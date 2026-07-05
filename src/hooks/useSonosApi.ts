@@ -130,6 +130,7 @@ export function usePlayback() {
     addToQueue: (trackIds: string[]) => send('queue/add', { trackIds }),
     playNow: (trackIds: string[]) => send('queue/play-now', { trackIds }),
     playNext: (trackIds: string[]) => send('queue/play-next', { trackIds }),
+    playFolderOrNow: (trackId: string) => send('queue/play-folder-or-now', { trackId }),
     removeFromQueue: (index: number) => send('queue/remove', { index }),
     clearQueue: () => send('queue/clear'),
     reorderQueue: (from: number, to: number) => send('queue/reorder', { from, to }),

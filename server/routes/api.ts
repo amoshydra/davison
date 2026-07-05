@@ -178,6 +178,18 @@ export function createApiRouter(): Router {
     res.json({ success: true })
   })
 
+  router.post('/queue/play-folder-or-now', (req, res) => {
+    const trackId = asString(req.body?.trackId)
+    if (!trackId) {
+      res.status(400).json({ error: 'trackId is required' })
+      return
+    }
+    queueManager.playFolderOrNow(trackId).catch(err => {
+      console.warn('Failed to play folder/now:', err)
+    })
+    res.json({ success: true })
+  })
+
   router.post('/loop', (req, res) => {
     const mode = asString(req.body?.mode)
     if (!VALID_LOOP_MODES.has(mode)) {

@@ -1,11 +1,16 @@
 import { EventEmitter } from 'node:events'
-import { MusicTrack, getTrackById } from './music-discovery.js'
+import { MusicTrack, getTrackById, getMusicLibrary } from './music-discovery.js'
 import { sonosController } from './sonos-controller.js'
 import { config } from '../config.js'
 
 export type LoopMode = 'none' | 'one' | 'all'
 
 const VALID_LOOP_MODES: ReadonlySet<string> = new Set(['none', 'one', 'all'])
+
+function folderPath(relativePath: string): string | null {
+  const idx = relativePath.lastIndexOf('/')
+  return idx >= 0 ? relativePath.slice(0, idx) : null
+}
 
 interface QueueState {
   queue: MusicTrack[]
@@ -199,6 +204,41 @@ class QueueManager extends EventEmitter {
       const insertAt = this.state.currentIndex !== null ? this.state.currentIndex + 1 : this.state.queue.length
       this.state.queue.splice(insertAt, 0, ...newTracks)
       this.emit('queue-change', this.getQueue())
+    })
+  }
+
+  async playFolderOrNow(trackId: string): Promise<void> {
+    await this.serialized(async () => {
+      const track = getTrackById(trackId)
+      if (!track) return
+      const existingIds = new Set(this.state.queue.map(t => t.id))
+      if (existingIds.has(track.id)) return
+
+      const folder = folderPath(track.relativePath)
+
+      // Folder-fill: queue empty + track has a directory
+      if (this.state.queue.length === 0 && folder) {
+        const allTracks = getMusicLibrary()
+        const folderTracks = allTracks
+          .filter(t => t.baseIdx === track.baseIdx && folderPath(t.relativePath) === folder)
+          .sort((a, b) => a.relativePath.localeCompare(b.relativePath))
+
+        const startIdx = folderTracks.findIndex(t => t.id === trackId)
+        this.state.queue = [...folderTracks.slice(startIdx), ...folderTracks.slice(0, startIdx)]
+        this.state.history = []
+        this.state.currentIndex = null
+        this.emit('queue-change', this.getQueue())
+        await this.playTrack(0)
+        return
+      }
+
+      // Insert next + play
+      const insertAt = this.state.currentIndex !== null
+        ? this.state.currentIndex + 1
+        : this.state.queue.length
+      this.state.queue.splice(insertAt, 0, track)
+      this.emit('queue-change', this.getQueue())
+      await this.playTrack(insertAt)
     })
   }
 

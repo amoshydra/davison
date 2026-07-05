@@ -6,6 +6,7 @@ interface Props {
   tracks: MusicTrack[]
   onAddToQueue: (ids: string[]) => void
   onPlayNow: (id: string) => void
+  onPlayFolderOrNow: (id: string) => void
   onPlayNext?: (ids: string[]) => void
 }
 
@@ -201,7 +202,7 @@ function DirSection({
   )
 }
 
-export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayNext }: Props) {
+export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNow, onPlayNext }: Props) {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [selectMode, setSelectMode] = useState(false)
@@ -235,7 +236,7 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayNext }: Pr
     if (selectMode) {
       toggle(id)
     } else {
-      onPlayNow(id)
+      onPlayFolderOrNow(id)
     }
   }
 

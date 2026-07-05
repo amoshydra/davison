@@ -43,6 +43,11 @@ export function App() {
     setView('now-playing')
   }
 
+  function handleFolderOrNow(trackId: string) {
+    playback.playFolderOrNow(trackId)
+    setView('now-playing')
+  }
+
   const vol = status.status?.sonos?.volume ?? 50
   const coverTrackId = status.status?.sonos?.track.trackId || status.status?.queue.currentTrack?.id || null
   const coverUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
@@ -89,6 +94,7 @@ export function App() {
                 tracks={music.tracks}
                 onAddToQueue={playback.addToQueue}
                 onPlayNow={handlePlayNow}
+                onPlayFolderOrNow={handleFolderOrNow}
                 onPlayNext={playback.playNext}
               />
           )}
