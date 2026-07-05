@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events'
 import { MusicTrack, getTrackById } from './music-discovery.js'
 import { sonosController } from './sonos-controller.js'
+import { config } from '../config.js'
 
 export type LoopMode = 'none' | 'one' | 'all'
 
@@ -75,7 +76,7 @@ class QueueManager extends EventEmitter {
     this.emit('track-change', track)
 
     try {
-      const streamUrl = `/api/music/stream/${track.id}`
+      const streamUrl = `http://${config.host}:${config.port}/api/music/stream/${track.id}`
       await sonosController.playUri(streamUrl)
     } catch (err) {
       console.error('Failed to play track:', err)

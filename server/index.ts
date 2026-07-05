@@ -14,11 +14,13 @@ program
   .description('Sonos music player with web UI')
   .option('-p, --path <paths...>', 'Path(s) to music directories')
   .option('--port <number>', 'Server port', '3000')
+  .option('--host <address>', 'Server LAN address (auto-detected if omitted)')
   .parse(process.argv)
 
 const options = program.opts()
 
 config.port = parseInt(options.port, 10) || 3000
+if (options.host) config.host = options.host
 config.musicPaths = options.path || []
 
 async function main() {
@@ -47,7 +49,7 @@ async function main() {
   })
 
   ViteExpress.listen(app, config.port, () => {
-    console.log(`Sonos Node running at http://localhost:${config.port}`)
+    console.log(`Sonos Node running at http://${config.host}:${config.port}`)
   })
 }
 
