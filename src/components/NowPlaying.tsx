@@ -1,5 +1,5 @@
 import { ChevronLeft, Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, Volume2 } from 'lucide-react'
-import { useCallback } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import type { ServerStatus, LoopMode } from '../types'
 
 interface Props {
@@ -31,6 +31,9 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
 
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
   const coverUrl = currentTrack ? `/api/music/cover/${currentTrack.id}` : null
+  const [coverError, setCoverError] = useState(false)
+
+  useEffect(() => { setCoverError(false) }, [currentTrack?.id])
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     // seeking not implemented on server yet
@@ -53,8 +56,13 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       )}
 
       <div className="now-playing-hero">
-        {coverUrl ? (
-          <img src={coverUrl} alt="Album art" className="now-playing-cover" />
+        {coverUrl && !coverError ? (
+          <img
+            src={coverUrl}
+            alt="Album art"
+            className="now-playing-cover"
+            onError={() => setCoverError(true)}
+          />
         ) : (
           <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
         )}

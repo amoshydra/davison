@@ -1,5 +1,5 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, Music } from 'lucide-react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { MusicTrack, ServerStatus } from '../types'
 
 interface Props {
@@ -19,6 +19,9 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   const sonos = status?.sonos
   const isPlaying = sonos?.state === 'PLAYING'
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
+  const [coverError, setCoverError] = useState(false)
+
+  useEffect(() => { setCoverError(false) }, [track?.id])
 
   const handlePlayPause = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -39,12 +42,12 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
       <div className="player-bar-content">
         <div className="player-bar-track">
           <div className="player-bar-cover">
-            {status?.queue.currentTrack ? (
+            {track && !coverError ? (
               <img
-                src={`/api/music/cover/${status.queue.currentTrack.id}`}
+                src={`/api/music/cover/${track.id}`}
                 alt=""
                 className="player-bar-img"
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                onError={() => setCoverError(true)}
               />
             ) : (
               <Music size={20} />
