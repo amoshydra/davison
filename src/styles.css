@@ -236,12 +236,12 @@ body {
 
 .player-bar-volume {
   display: flex; align-items: center;
-  gap: var(--sp-4); flex-shrink: 0; color: var(--text3);
-  margin-left: var(--sp-4);
+  gap: var(--sp-2); flex-shrink: 0; color: var(--text3);
+  margin-left: var(--sp-6);
 }
 
 .pv-btn {
-  width: 28px; height: 28px;
+  width: 26px; height: 26px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--surface3); background: transparent;
   border-radius: var(--sp-4); color: var(--text3);
@@ -250,8 +250,8 @@ body {
 .pv-btn:active { background: var(--surface2); }
 
 .pv-value {
-  min-width: 22px; text-align: center;
-  font-size: .75rem; font-weight: 600; color: var(--text2);
+  min-width: 20px; text-align: center;
+  font-size: .7rem; font-weight: 600; color: var(--text2);
 }
 
 @media (min-width: 480px) { .player-bar-volume { display: flex; } }
@@ -281,8 +281,12 @@ body {
 /* Bottom section — always at the bottom */
 .np-bottom {
   display: flex; flex-direction: column;
-  gap: var(--sp-6);
-  padding-top: var(--sp-8);
+  gap: var(--sp-4);
+}
+
+.np-controls-row {
+  display: flex; align-items: center;
+  gap: var(--sp-8);
 }
 
 .np-hero {
@@ -332,12 +336,12 @@ body {
 
 /* ─── Volume buttons (replaces slider) ─── */
 .np-volume {
-  width: 100%; display: flex; align-items: center; justify-content: center;
-  gap: var(--sp-8); color: var(--text3); font-size: .75rem;
+  display: flex; align-items: center;
+  gap: var(--sp-4); margin-left: auto;
 }
 
 .np-vol-btn {
-  width: 36px; height: 36px;
+  width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--surface3); background: transparent;
   border-radius: var(--sp-6); color: var(--text2);
@@ -346,8 +350,8 @@ body {
 .np-vol-btn:active { background: var(--surface2); border-color: var(--text3); }
 
 .np-vol-value {
-  min-width: 28px; text-align: center;
-  font-size: .85rem; font-weight: 600; color: var(--text);
+  min-width: 24px; text-align: center;
+  font-size: .8rem; font-weight: 600; color: var(--text);
 }
 
 /* ─── Controls ─── */

@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, Volume2, ListMusic, Minus, Plus } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, ListMusic, Minus, Plus } from 'lucide-react'
 import { useCallback, useState, useEffect, useRef } from 'react'
 import type { ServerStatus, LoopMode } from '../types'
 
@@ -108,34 +108,34 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       </div>
 
       <div className="np-bottom">
-        <div className="np-volume">
-          <Volume2 size={14} />
-          <button className="np-vol-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
-            <Minus size={16} />
-          </button>
-          <span className="np-vol-value">{volume}</span>
-          <button className="np-vol-btn" onClick={() => onSetVolume(Math.min(100, volume + 5))} aria-label="Volume up">
-            <Plus size={16} />
-          </button>
-        </div>
-
-        <div className="np-controls">
-          <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
-            {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
-            {loopMode !== 'none' && <span className="np-badge" />}
-          </button>
-          <button className="np-btn" onClick={onPrevious} aria-label="Previous">
-            <SkipBack size={24} />
-          </button>
-          <button className="np-play" onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-            {isPlaying ? <Pause size={30} /> : <Play size={30} />}
-          </button>
-          <button className="np-btn" onClick={onNext} aria-label="Next">
-            <SkipForward size={24} />
-          </button>
-          <button className="np-btn" onClick={() => setShowUpNext(!showUpNext)} aria-label="Up next">
-            <ListMusic size={20} />
-          </button>
+        <div className="np-controls-row">
+          <div className="np-controls">
+            <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
+              {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
+              {loopMode !== 'none' && <span className="np-badge" />}
+            </button>
+            <button className="np-btn" onClick={onPrevious} aria-label="Previous">
+              <SkipBack size={24} />
+            </button>
+            <button className="np-play" onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+              {isPlaying ? <Pause size={30} /> : <Play size={30} />}
+            </button>
+            <button className="np-btn" onClick={onNext} aria-label="Next">
+              <SkipForward size={24} />
+            </button>
+            <button className="np-btn" onClick={() => setShowUpNext(!showUpNext)} aria-label="Up next">
+              <ListMusic size={20} />
+            </button>
+          </div>
+          <div className="np-volume">
+            <button className="np-vol-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
+              <Minus size={14} />
+            </button>
+            <span className="np-vol-value">{volume}</span>
+            <button className="np-vol-btn" onClick={() => onSetVolume(Math.min(100, volume + 5))} aria-label="Volume up">
+              <Plus size={14} />
+            </button>
+          </div>
         </div>
 
         {sonos && (
