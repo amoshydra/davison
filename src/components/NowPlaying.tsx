@@ -7,6 +7,7 @@ interface Props {
   volume: number
   loopMode: LoopMode
   deviceName?: string
+  syncing?: boolean
   onPlay: () => void
   onPause: () => void
   onNext: () => void
@@ -21,7 +22,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop }: Props) {
+export function NowPlayingView({ status, volume, loopMode, deviceName, syncing, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop }: Props) {
   const sonos = status?.sonos
   const queue = status?.queue.queue || []
   const currentIndex = status?.queue.currentIndex ?? -1
@@ -133,7 +134,7 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       </div>
 
       {/* Bottom row — pinned */}
-      <div className="np-bottom-row">
+      <div className={`np-bottom-row${syncing ? ' syncing' : ''}`}>
         <div className="np-bottom-controls">
           <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
             {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}

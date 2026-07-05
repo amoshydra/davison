@@ -730,7 +730,8 @@ body {
   padding: var(--sp-48) var(--sp-16);
 }
 
-/* ─── Settings ─── */
+/* ─── Syncing state (optimistic UI pending) ─── */
+.syncing { opacity: .65; transition: opacity .15s; }
 .settings-view { display: flex; flex-direction: column; gap: var(--g-form); padding: var(--p-card); min-width: 0; }
 
 .settings-row { display: flex; align-items: center; gap: var(--sp-10); }
@@ -761,3 +762,6 @@ body {
 .settings-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .settings-dot.online { background: #22c55e; }
 .settings-dot.offline { background: var(--text3); }
+
+/* ─── Syncing state (optimistic UI pending) ─── */
+.syncing { opacity: .65; transition: opacity .15s; }

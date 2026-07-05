@@ -6,6 +6,7 @@ interface Props {
   status: ServerStatus | null
   volume: number
   deviceName?: string
+  syncing?: boolean
   onPlay: () => void
   onPause: () => void
   onNext: () => void
@@ -14,7 +15,7 @@ interface Props {
   onClickTrack: () => void
 }
 
-export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext, onPrevious, onSetVolume, onClickTrack }: Props) {
+export function PlayerBar({ status, volume, deviceName, syncing, onPlay, onPause, onNext, onPrevious, onSetVolume, onClickTrack }: Props) {
   const track = status?.queue.currentTrack
   const sonos = status?.sonos
   const isPlaying = sonos?.state === 'PLAYING'
@@ -39,7 +40,7 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   if (!track) return null
 
   return (
-    <div className="player-bar" onClick={onClickTrack}>
+    <div className={`player-bar${syncing ? ' syncing' : ''}`} onClick={onClickTrack}>
       <div className="player-bar-progress" style={{ width: noDevice ? '100%' : `${progress}%`, opacity: noDevice ? .3 : 1 }} />
       <div className="player-bar-content">
         <div className="player-bar-track">

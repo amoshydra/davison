@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Music, ListMusic, Disc3, ListOrdered, Settings } from 'lucide-react'
 import { useDevices, useMusic, useStatus, usePlayback, usePlaylists } from './hooks/useSonosApi'
+import type { LoopMode, SonosStatus } from './types'
 import { DeviceSelector } from './components/DeviceSelector'
 import { MusicBrowser } from './components/MusicBrowser'
 import { NowPlayingView } from './components/NowPlaying'
@@ -48,6 +49,39 @@ export function App() {
   useEffect(() => {
     if (devices.selectedId) status.startPolling()
   }, [devices.selectedId])
+
+  // Optimistic state — immediate UI feedback before poll confirms
+  const [syncState, setSyncState] = useState<SonosStatus['state'] | null>(null)
+  const [syncVolume, setSyncVolume] = useState<number | null>(null)
+
+  useEffect(() => {
+    const s = status.status?.sonos
+    if (s) {
+      if (syncState !== null && s.state === syncState) setSyncState(null)
+      if (syncVolume !== null && s.volume === syncVolume) setSyncVolume(null)
+    }
+  }, [status.status?.sonos])
+
+  const optPlay = useCallback(() => {
+    setSyncState('PLAYING')
+    playback.play()
+  }, [playback])
+  const optPause = useCallback(() => {
+    setSyncState('PAUSED_PLAYBACK')
+    playback.pause()
+  }, [playback])
+  const optVolume = useCallback((v: number) => {
+    setSyncVolume(v)
+    playback.setVolume(v)
+  }, [playback])
+  const optNext = useCallback(() => {
+    setSyncState('PLAYING')
+    playback.next()
+  }, [playback])
+  const optPrevious = useCallback(() => {
+    setSyncState('PLAYING')
+    playback.previous()
+  }, [playback])
 
   async function handlePlayNow(trackIds: string[]) {
     await playback.playNow(trackIds)
@@ -124,14 +158,15 @@ export function App() {
           <div className="view-stack" style={{ display: view === 'now-playing' ? 'flex' : 'none' }}>
             <NowPlayingView
               status={status.status}
-              volume={vol}
+              volume={syncVolume !== null ? syncVolume : vol}
               loopMode={status.status?.queue.loopMode || 'all'}
               deviceName={devices.selectedDevice?.name}
-              onPlay={playback.play}
-              onPause={playback.pause}
-              onNext={playback.next}
-              onPrevious={playback.previous}
-              onSetVolume={playback.setVolume}
+              syncing={syncState !== null || syncVolume !== null}
+              onPlay={optPlay}
+              onPause={optPause}
+              onNext={optNext}
+              onPrevious={optPrevious}
+              onSetVolume={optVolume}
               onSetLoop={playback.setLoop}
             />
           </div>
@@ -172,13 +207,14 @@ export function App() {
         {view !== 'now-playing' && (
           <PlayerBar
             status={status.status}
-            volume={vol}
+            volume={syncVolume !== null ? syncVolume : vol}
             deviceName={devices.selectedDevice?.name}
-            onPlay={playback.play}
-            onPause={playback.pause}
-            onNext={playback.next}
-            onPrevious={playback.previous}
-            onSetVolume={playback.setVolume}
+            syncing={syncState !== null || syncVolume !== null}
+            onPlay={optPlay}
+            onPause={optPause}
+            onNext={optNext}
+            onPrevious={optPrevious}
+            onSetVolume={optVolume}
             onClickTrack={() => setView('now-playing')}
           />
         )}
