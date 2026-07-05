@@ -7,21 +7,25 @@
     "davison": "./bin/davison.js"
   },
   "scripts": {
-    "prepare": "vite build",
     "dev": "tsx watch --ignore './vite.config.ts.timestamp-*' --ignore ./src --ignore ./node_modules server/index.ts",
-    "build": "vite build",
-    "serve": "NODE_ENV=production tsx server/index.ts",
+    "build:frontend": "vite build",
+    "build:server": "tsc -p tsconfig.server.json",
+    "build": "npm run build:server && npm run build:frontend",
+    "serve": "NODE_ENV=production node dist-server/index.js",
     "typecheck": "tsc --noEmit",
     "docker:build": "docker build -t davison .",
     "docker:run": "docker run --network host -v $(pwd)/music:/music:ro davison --path /music"
   },
+  "files": [
+    "dist/",
+    "dist-server/",
+    "bin/",
+    "patches/",
+    "package.json"
+  ],
   "dependencies": {
-    "@nephele/adapter-file-system": "1.0.0-alpha.67",
-    "@nephele/authenticator-custom": "1.0.0-alpha.67",
-    "@nephele/authenticator-none": "1.0.0-alpha.67",
     "commander": "^12.1.0",
     "express": "^4.21.0",
-    "lucide-react": "^1.23.0",
     "mime": "^4.1.0",
     "music-metadata": "^10.6.0",
     "nephele": "1.0.0-alpha.67",
@@ -37,6 +41,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "lucide-react": "^1.23.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tsx": "^4.23.0",

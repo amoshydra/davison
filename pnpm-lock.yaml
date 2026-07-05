@@ -13,24 +13,12 @@ importers:
 
   .:
     dependencies:
-      '@nephele/adapter-file-system':
-        specifier: 1.0.0-alpha.67
-        version: 1.0.0-alpha.67
-      '@nephele/authenticator-custom':
-        specifier: 1.0.0-alpha.67
-        version: 1.0.0-alpha.67
-      '@nephele/authenticator-none':
-        specifier: 1.0.0-alpha.67
-        version: 1.0.0-alpha.67
       commander:
         specifier: ^12.1.0
         version: 12.1.0
       express:
         specifier: ^4.21.0
         version: 4.22.2
-      lucide-react:
-        specifier: ^1.23.0
-        version: 1.23.0(react@18.3.1)
       mime:
         specifier: ^4.1.0
         version: 4.1.0
@@ -71,6 +59,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.7.0(vite@5.4.21(@types/node@22.20.0))
+      lucide-react:
+        specifier: ^1.23.0
+        version: 1.23.0(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -485,18 +476,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@nephele/adapter-file-system@1.0.0-alpha.67':
-    resolution: {integrity: sha512-Fhl9NIMHEMZhDXjGeknGDuiGvuKGnwiBnBbZcTIpuAjqHCm9vswXKcTDoHrjyvYAeyCb3qnTHWkhM3wb570dgQ==}
-    engines: {node: '>=18'}
-
-  '@nephele/authenticator-custom@1.0.0-alpha.67':
-    resolution: {integrity: sha512-qKd4n1fXTuVwlOgeiOtoCMr3/yam9d+zpiOS1aOFKY5m+l7b4l3ABVeQc9Vq1H1qhupfJnVvjOpj1Y945w2Yyw==}
-    engines: {node: '>=18'}
-
-  '@nephele/authenticator-none@1.0.0-alpha.67':
-    resolution: {integrity: sha512-34FraS3dW19HWs5vT5ZPOo0/e4atUUS8j9skm31y0I1Jj6bxXWUCyJ5LgMVxJBsv3JNxAGy+/tO/ij+xp9z18Q==}
-    engines: {node: '>=18'}
-
   '@rolldown/pluginutils@1.0.0-beta.27':
     resolution: {integrity: sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA==}
 
@@ -638,9 +617,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@sciactive/splitn@1.0.0':
-    resolution: {integrity: sha512-z3CI0SVzAsLYmRvLDS1pOzIX9ztCVXIT9n4MMRGM7GVbu8clZqbXoz3/NytQfyP2KSeYU7YoZYlQpYkQ7KsQ1w==}
-
   '@sciactive/splitn@3.1.0':
     resolution: {integrity: sha512-Ajx+CEk55Yhum42I69KLWaIMiSANLSyVcHzZv6T+nA6SwT+z4dZsfBDdX7vMPBHItEmSuXJtd7YYY8OBCxrG4w==}
 
@@ -779,10 +755,6 @@ packages:
   caniuse-lite@1.0.30001800:
     resolution: {integrity: sha512-MMHtuAz9Ys840zAY5F4k6fV5GaivZ9sPk+nz0mY+GYVzRBnYkN0mpqkSR92oWRQ19yQWo4HvBV/FnC16AJX8MA==}
 
-  check-disk-space@3.4.0:
-    resolution: {integrity: sha512-drVkSqfwA+TvuEhFipiR1OC9boEGZL5RrWvVsOthdcvQNXyCCuKkEiTOTXZ7qxSf/GLwq4GvzfrQD/Wz325hgw==}
-    engines: {node: '>=16'}
-
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
@@ -830,10 +802,6 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
-
-  cyclic-32@1.2.0:
-    resolution: {integrity: sha512-lHmTMKGQtbsdFy+S1byzblPY0R2WNhkI8/NIKWvYD0UjYPXRxgJ8S8JqhEnrkj/X98CwgGcWz7muecM5xfQziw==}
-    hasBin: true
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -1002,10 +970,6 @@ packages:
   hasown@2.0.4:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
-
-  http-auth-utils-hperrin@3.0.4:
-    resolution: {integrity: sha512-gRV9GMNpT4UTLbCdE4Y+PCjK1vR7tULbKAwJmUGvXsfaCIHMPFVC3HBJSpSGyFxTNJrFxZbc4eK1tFW9zqZznQ==}
-    engines: {node: '>=16.15.0'}
 
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
@@ -1418,10 +1382,6 @@ packages:
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
-  yerror@6.2.1:
-    resolution: {integrity: sha512-WPZgybhCBzsMSSqGYBnj20NZo4FiFKQG0+i/21cYGVd4B7eYtvYDOpjk/0e8UM1eVHJ+4Ja6bZ7TAjHH6mk+ew==}
-    engines: {node: '>=12.19.0'}
-
 snapshots:
 
   '@babel/code-frame@7.29.7':
@@ -1704,29 +1664,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@nephele/adapter-file-system@1.0.0-alpha.67':
-    dependencies:
-      check-disk-space: 3.4.0
-      cyclic-32: 1.2.0
-      mime: 4.1.0
-      nephele: 1.0.0-alpha.67(patch_hash=2c5231b423754c7330f197cfb39011120c5a9fba649beb38cfadc8eef41a4747)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@nephele/authenticator-custom@1.0.0-alpha.67':
-    dependencies:
-      http-auth-utils-hperrin: 3.0.4
-      nephele: 1.0.0-alpha.67(patch_hash=2c5231b423754c7330f197cfb39011120c5a9fba649beb38cfadc8eef41a4747)
-      uuid: 13.0.2
-    transitivePeerDependencies:
-      - supports-color
-
-  '@nephele/authenticator-none@1.0.0-alpha.67':
-    dependencies:
-      nephele: 1.0.0-alpha.67(patch_hash=2c5231b423754c7330f197cfb39011120c5a9fba649beb38cfadc8eef41a4747)
-    transitivePeerDependencies:
-      - supports-color
-
   '@rolldown/pluginutils@1.0.0-beta.27': {}
 
   '@rollup/rollup-android-arm-eabi@4.62.2':
@@ -1803,8 +1740,6 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.62.2':
     optional: true
-
-  '@sciactive/splitn@1.0.0': {}
 
   '@sciactive/splitn@3.1.0': {}
 
@@ -1999,8 +1934,6 @@ snapshots:
 
   caniuse-lite@1.0.30001800: {}
 
-  check-disk-space@3.4.0: {}
-
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
@@ -2033,8 +1966,6 @@ snapshots:
   cookie@0.7.2: {}
 
   csstype@3.2.3: {}
-
-  cyclic-32@1.2.0: {}
 
   debug@2.6.9:
     dependencies:
@@ -2303,11 +2234,6 @@ snapshots:
   hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
-
-  http-auth-utils-hperrin@3.0.4:
-    dependencies:
-      '@sciactive/splitn': 1.0.0
-      yerror: 6.2.1
 
   http-errors@2.0.1:
     dependencies:
@@ -2736,5 +2662,3 @@ snapshots:
   xmlbuilder@11.0.1: {}
 
   yallist@3.1.1: {}
-
-  yerror@6.2.1: {}
