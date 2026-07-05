@@ -21,7 +21,9 @@
     "dist-server/",
     "bin/",
     "patches/",
-    "package.json"
+    "package.json",
+    "README.md",
+    "LICENSE"
   ],
   "dependencies": {
     "commander": "^12.1.0",
