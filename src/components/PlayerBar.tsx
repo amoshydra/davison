@@ -23,7 +23,8 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   const [coverError, setCoverError] = useState(false)
   const coverTrackId = sonos?.track.trackId || track?.id
   const coverImgUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
-  const albumColor = useAlbumColor(coverError ? null : coverImgUrl)
+  const fallbackKey = sonos ? `${sonos.track.title}|${sonos.track.artist}|${sonos.track.album}` : track ? `${track.title}|${track.artist}` : undefined
+  const albumColor = useAlbumColor(coverError ? null : coverImgUrl, fallbackKey)
 
   useEffect(() => { setCoverError(false) }, [coverTrackId])
 
@@ -41,7 +42,7 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   }
 
   return (
-    <div className="player-bar" onClick={onClickTrack} style={{ '--cover-rgb': albumColor || '6, 182, 212' } as React.CSSProperties}>
+    <div className="player-bar" onClick={onClickTrack} style={{ '--cover-rgb': albumColor } as React.CSSProperties}>
       <div className="player-bar-progress" style={{ width: `${progress}%` }} />
       <div className="player-bar-content">
         <div className="player-bar-track">

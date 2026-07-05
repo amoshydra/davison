@@ -33,7 +33,8 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
   const coverUrl = (sonos?.track.trackId || currentTrack?.id) ? `/api/music/cover/${sonos?.track.trackId || currentTrack?.id}` : null
   const [coverError, setCoverError] = useState(false)
-  const albumColor = useAlbumColor(coverError ? null : coverUrl)
+  const fallbackKey = sonos ? `${sonos.track.title}|${sonos.track.artist}|${sonos.track.album}` : undefined
+  const albumColor = useAlbumColor(coverError ? null : coverUrl, fallbackKey)
 
   useEffect(() => { setCoverError(false) }, [sonos?.track.trackId, currentTrack?.id])
 
@@ -49,7 +50,7 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
   }, [loopMode, onSetLoop])
 
   return (
-    <div className="now-playing-view" style={{ '--cover-rgb': albumColor || '6, 182, 212' } as React.CSSProperties}>
+    <div className="now-playing-view" style={{ '--cover-rgb': albumColor } as React.CSSProperties}>
       {onBack && (
         <button className="now-playing-back" onClick={onBack}>
           <ChevronLeft size={20} />

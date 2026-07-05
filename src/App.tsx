@@ -46,10 +46,12 @@ export function App() {
   const vol = status.status?.sonos?.volume ?? 50
   const coverTrackId = status.status?.sonos?.track.trackId || status.status?.queue.currentTrack?.id || null
   const coverUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
-  const albumColor = useAlbumColor(coverUrl)
+  const sonos = status.status?.sonos
+  const fallbackKey = sonos ? `${sonos.track.title}|${sonos.track.artist}|${sonos.track.album}` : undefined
+  const albumColor = useAlbumColor(coverUrl, fallbackKey)
 
   return (
-    <div className="app" style={{ '--cover-rgb': albumColor || '6, 182, 212' } as React.CSSProperties}>
+    <div className="app" style={{ '--cover-rgb': albumColor } as React.CSSProperties}>
       {/* Desktop sidebar */}
       <nav className="sidebar">
         <div className="sidebar-logo">S</div>
