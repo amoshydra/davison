@@ -1,0 +1,26 @@
+diff --git a/dist/Methods/GET_HEAD.js b/dist/Methods/GET_HEAD.js
+index dc911602a7d7f0c18e2aa94d4e5b56aad20ed303..07a7bba2a27f9c8494ef2a0203e879e4537edb8f 100644
+--- a/dist/Methods/GET_HEAD.js
++++ b/dist/Methods/GET_HEAD.js
+@@ -200,6 +200,11 @@ export class GET_HEAD extends Method {
+                     'Transfer-Encoding': 'chunked',
+                 });
+             }
++            if (encoding === 'identity') {
++                response.set({
++                    'Content-Length': `${await resource.getLength()}`,
++                });
++            }
+             response.locals.debug(`Response encoding: ${encoding}`);
+             if (request.method !== 'HEAD') {
+                 let stream = await resource.getStream();
+@@ -210,9 +215,6 @@ export class GET_HEAD extends Method {
+                 });
+                 response.locals.debug('Beginning response stream.');
+                 if (encoding === 'identity') {
+-                    response.set({
+-                        'Content-Length': `${await resource.getLength()}`,
+-                    });
+                     await new Promise((resolve, reject) => {
+                         stream.on('error', reject);
+                         stream.on('end', () => {
