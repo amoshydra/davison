@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { Check, Minus, ChevronRight, ChevronDown } from 'lucide-react'
 import type { MusicTrack } from '../types'
 
@@ -184,6 +184,19 @@ function DirSection({
   const allIds = useMemo(() => flattenIds(dir), [dir])
   const allSelected = allIds.length > 0 && allIds.every(id => selected.has(id))
   const someSelected = allIds.some(id => selected.has(id))
+
+  const headerTimer = useRef<ReturnType<typeof setTimeout>>()
+  const handleHeaderTouchStart = useCallback(() => {
+    headerTimer.current = setTimeout(() => {
+      onToggleMany(allIds)
+    }, 400)
+  }, [onToggleMany, allIds])
+  const handleHeaderTouchEnd = useCallback(() => {
+    if (headerTimer.current) {
+      clearTimeout(headerTimer.current)
+      headerTimer.current = undefined
+    }
+  }, [])
   const hasContent = useMemo(() => {
     if (!search) return true
     return dir.tracks.some(t => matches(t, search)) || dir.dirs.some(sub => {
@@ -218,6 +231,9 @@ function DirSection({
         style={{ '--depth': depth } as React.CSSProperties}
         onClick={() => setCollapsed(!collapsed)}
         onContextMenu={e => e.preventDefault()}
+        onTouchStart={handleHeaderTouchStart}
+        onTouchEnd={handleHeaderTouchEnd}
+        onTouchMove={handleHeaderTouchEnd}
       >
         <span
           className={`track-check${allSelected ? ' checked' : ''}${someSelected && !allSelected ? ' indeterminate' : ''}`}
