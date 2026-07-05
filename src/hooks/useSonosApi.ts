@@ -2,6 +2,19 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { SonosDevice, MusicTrack, ServerStatus, Playlist, LoopMode } from '../types'
 
 const BASE = '/api'
+const CACHE_KEY_DEVICES = 'sonos:devices'
+const CACHE_KEY_SELECTED = 'sonos:selectedId'
+
+function cacheGet<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch { return fallback }
+}
+
+function cacheSet(key: string, value: unknown): void {
+  try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* ignore */ }
+}
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${url}`, {
@@ -13,27 +26,33 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function useDevices() {
-  const [devices, setDevices] = useState<SonosDevice[]>([])
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [devices, setDevices] = useState<SonosDevice[]>(() => cacheGet(CACHE_KEY_DEVICES, []))
+  const [selectedId, setSelectedId] = useState<string | null>(() => cacheGet(CACHE_KEY_SELECTED, null))
   const [isScanning, setIsScanning] = useState(false)
+  const hasCached = useRef(devices.length > 0)
 
   const select = useCallback(async (id: string) => {
     await fetchJson('/devices/select', { method: 'POST', body: JSON.stringify({ id }) })
     setSelectedId(id)
+    cacheSet(CACHE_KEY_SELECTED, id)
   }, [])
 
-  const discover = useCallback(async () => {
-    setIsScanning(true)
+  const discover = useCallback(async (showSpinner = false) => {
+    if (showSpinner) setIsScanning(true)
     try {
       const d = await fetchJson<SonosDevice[]>('/devices/discover', { method: 'POST' })
+
+      if (d.length > 0) {
+        cacheSet(CACHE_KEY_DEVICES, d)
+      }
       setDevices(d)
 
       const stillExists = selectedId && d.some(dev => dev.id === selectedId)
       if (stillExists) {
-        // preserved — no change needed
+        cacheSet(CACHE_KEY_SELECTED, selectedId)
       } else if (d.length === 1) {
         await select(d[0].id)
-      } else {
+      } else if (d.length === 0) {
         setSelectedId(null)
       }
 
@@ -42,6 +61,10 @@ export function useDevices() {
       setIsScanning(false)
     }
   }, [selectedId, select])
+
+  useEffect(() => {
+    void discover(!hasCached.current)
+  }, [])
 
   const selectedDevice = devices.find(d => d.id === selectedId) || null
 

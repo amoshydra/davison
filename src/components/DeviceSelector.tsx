@@ -1,18 +1,14 @@
-import { useEffect } from 'react'
 import type { SonosDevice } from '../types'
 
 interface Props {
   devices: SonosDevice[]
   selectedDevice: SonosDevice | null
   isScanning: boolean
-  onDiscover: () => void
+  onRefresh: () => void
   onSelect: (id: string) => void
 }
 
-export function DeviceSelector({ devices, selectedDevice, isScanning, onDiscover, onSelect }: Props) {
-  useEffect(() => {
-    if (devices.length === 0 && !isScanning) onDiscover()
-  }, [])
+export function DeviceSelector({ devices, selectedDevice, isScanning, onRefresh, onSelect }: Props) {
 
   return (
     <div className="device-selector">
@@ -51,7 +47,7 @@ export function DeviceSelector({ devices, selectedDevice, isScanning, onDiscover
             </option>
           ))}
         </select>
-        <button onClick={onDiscover} disabled={isScanning}>
+        <button onClick={onRefresh} disabled={isScanning}>
           {isScanning ? 'Scanning...' : 'Refresh'}
         </button>
       </div>

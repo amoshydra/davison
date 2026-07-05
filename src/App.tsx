@@ -42,7 +42,7 @@ export function App() {
           devices={devices.devices}
           selectedDevice={devices.selectedDevice}
           isScanning={devices.isScanning}
-          onDiscover={devices.discover}
+          onRefresh={() => devices.discover(true)}
           onSelect={devices.select}
         />
       </header>
