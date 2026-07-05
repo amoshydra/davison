@@ -5,7 +5,7 @@ import type { MusicTrack } from '../types'
 interface Props {
   tracks: MusicTrack[]
   onAddToQueue: (ids: string[]) => void
-  onPlayNow: (id: string) => void
+  onPlayNow: (ids: string[]) => void
   onPlayFolderOrNow: (id: string) => void
   onPlayNext?: (ids: string[]) => void
 }
@@ -407,7 +407,7 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNo
           <span className="select-bar-count">{selected.size} selected</span>
           <div className="select-bar-actions">
             {selected.size > 0 && (
-              <button className="select-bar-btn primary" onClick={() => { onPlayNow(Array.from(selected)[0]); exitSelectMode() }}>
+              <button className="select-bar-btn primary" onClick={() => { onPlayNow(Array.from(selected)); exitSelectMode() }}>
                 Play
               </button>
             )}

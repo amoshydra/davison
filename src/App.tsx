@@ -49,8 +49,8 @@ export function App() {
     if (devices.selectedId) status.startPolling()
   }, [devices.selectedId])
 
-  async function handlePlayNow(trackId: string) {
-    await playback.playNow([trackId])
+  async function handlePlayNow(trackIds: string[]) {
+    await playback.playNow(trackIds)
     await status.fetchStatus()
     setView('now-playing')
   }
