@@ -18,28 +18,56 @@ export function createMusicServerRouter(): Router {
       const fileSize = fileStat.size
       const range = req.headers.range
 
-      if (range) {
-        const parts = range.replace(/bytes=/, '').split('-')
-        const start = parseInt(parts[0], 10)
-        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
-        const chunkSize = end - start + 1
+      const sendStream = (start: number, end: number) => {
+        const stream = createReadStream(track.filePath, { start, end })
 
+        stream.on('error', (err) => {
+          console.error('Stream error:', err)
+          if (!res.headersSent) {
+            res.status(500).json({ error: 'Stream error' })
+          }
+        })
+
+        res.on('close', () => {
+          stream.destroy()
+        })
+
+        stream.pipe(res)
+      }
+
+      if (range) {
+        const match = range.match(/^bytes=(\d+)-(\d*)$/)
+        if (!match) {
+          res.status(416).json({ error: 'Invalid range' })
+          return
+        }
+        const start = parseInt(match[1], 10)
+        const end = match[2] ? parseInt(match[2], 10) : fileSize - 1
+
+        if (start >= fileSize || end >= fileSize || start > end) {
+          res.status(416).json({ error: 'Range not satisfiable' })
+          return
+        }
+
+        const chunkSize = end - start + 1
         res.writeHead(206, {
           'Content-Range': `bytes ${start}-${end}/${fileSize}`,
           'Accept-Ranges': 'bytes',
           'Content-Length': chunkSize,
           'Content-Type': 'audio/mpeg',
         })
-        createReadStream(track.filePath, { start, end }).pipe(res)
+        sendStream(start, end)
       } else {
         res.writeHead(200, {
           'Content-Length': fileSize,
           'Content-Type': 'audio/mpeg',
         })
-        createReadStream(track.filePath).pipe(res)
+        sendStream(0, fileSize - 1)
       }
     } catch {
-      res.status(500).json({ error: 'Failed to stream file' })
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to stream file' })
+      }
     }
   })
 

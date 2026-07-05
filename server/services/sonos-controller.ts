@@ -26,11 +26,24 @@ export interface SonosStatus {
   muted: boolean
 }
 
+const VALID_STATES: ReadonlySet<string> = new Set(['PLAYING', 'PAUSED_PLAYBACK', 'STOPPED'])
+
+const SSDP_MULTICAST_ADDR = '239.255.255.250'
+const SSDP_PORT = 1900
+const SONOS_UPNP_PORT = 1400
+const SSDP_TIMEOUT = 5000
+const TCP_SCAN_PORT = 1400
+const TCP_SCAN_TIMEOUT = 500
+const TCP_SCAN_RESOLVE_DELAY = 600
+const MULTICAST_TTL = 4
+
+const IGNORED_IFACES = ['wg', 'tun', 'docker', 'br-']
+
 function findLanAddress(): string {
   const ifaces = os.networkInterfaces()
   for (const [name, addrs] of Object.entries(ifaces)) {
     if (!addrs) continue
-    if (name.startsWith('wg') || name.startsWith('tun') || name.startsWith('docker') || name.startsWith('br-')) continue
+    if (IGNORED_IFACES.some(p => name.startsWith(p))) continue
     for (const addr of addrs) {
       if (addr.family === 'IPv4' && !addr.internal) {
         return addr.address
@@ -45,7 +58,7 @@ function getSubnets(): string[] {
   const ifaces = os.networkInterfaces()
   for (const [name, addrs] of Object.entries(ifaces)) {
     if (!addrs) continue
-    if (name.startsWith('wg') || name.startsWith('tun') || name.startsWith('docker') || name.startsWith('br-') || name === 'lo') continue
+    if (IGNORED_IFACES.some(p => name.startsWith(p)) || name === 'lo') continue
     for (const addr of addrs) {
       if (addr.family === 'IPv4' && !addr.internal && addr.cidr) {
         subnets.push(addr.cidr)
@@ -55,20 +68,82 @@ function getSubnets(): string[] {
   return subnets
 }
 
+function normalizeSonosState(state: string): SonosStatus['state'] {
+  if (VALID_STATES.has(state)) return state as SonosStatus['state']
+  console.warn('Unknown Sonos state:', state)
+  return 'STOPPED'
+}
+
 class SonosController extends EventEmitter {
   private devices: Map<string, Sonos> = new Map()
   private deviceInfo: Map<string, SonosDevice> = new Map()
   private selectedDevice: string | null = null
+  private discovering = false
 
-  async discoverDevices(timeout = 5000): Promise<SonosDevice[]> {
-    this.devices.clear()
-    this.deviceInfo.clear()
+  async discoverDevices(timeout = SSDP_TIMEOUT): Promise<SonosDevice[]> {
+    if (this.discovering) {
+      console.warn('Discovery already in progress')
+      return this.getDevices()
+    }
+    this.discovering = true
 
-    const lanAddr = findLanAddress()
-    const foundIps = new Set<string>()
+    try {
+      const lanAddr = findLanAddress()
+      const foundIps = new Set<string>()
 
-    // SSDP multicast discovery
-    await new Promise<void>((resolve) => {
+      // SSDP multicast discovery
+      try {
+        await this.ssdpDiscover(foundIps, lanAddr, timeout)
+      } catch (err) {
+        console.warn('SSDP discovery failed:', err)
+      }
+
+      // Fallback: TCP port scan
+      if (foundIps.size === 0) {
+        try {
+          await this.tcpScan(foundIps)
+        } catch (err) {
+          console.warn('TCP scan failed:', err)
+        }
+      }
+
+      // Build new device map, preserve existing selected device
+      const newDevices = new Map<string, Sonos>()
+      const newDeviceInfo = new Map<string, SonosDevice>()
+
+      for (const ip of foundIps) {
+        try {
+          const device = new Sonos(ip)
+          const desc = await device.deviceDescription()
+          const id = desc.UUID || device.host
+          const name = desc.roomName || desc.displayName || device.host
+          const group = name // simplified; getAllGroups is slow per-device
+
+          newDevices.set(id, device)
+          newDeviceInfo.set(id, { id, name, ip: device.host, model: desc.modelName || '', group })
+          this.emit('device-found', newDeviceInfo.get(id))
+        } catch (err) {
+          console.warn(`Failed to register device at ${ip}:`, err)
+        }
+      }
+
+      this.devices = newDevices
+      this.deviceInfo = newDeviceInfo
+
+      // If previously selected device is gone, clear selection
+      if (this.selectedDevice && !this.devices.has(this.selectedDevice)) {
+        console.warn('Previously selected device no longer available')
+        this.selectedDevice = null
+      }
+
+      return this.getDevices()
+    } finally {
+      this.discovering = false
+    }
+  }
+
+  private ssdpDiscover(foundIps: Set<string>, lanAddr: string, timeout: number): Promise<void> {
+    return new Promise<void>((resolve) => {
       const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
 
       socket.on('message', (msg, rinfo) => {
@@ -77,102 +152,87 @@ class SonosController extends EventEmitter {
         }
       })
 
-      socket.on('error', () => { /* ignore */ })
+      socket.on('error', (err) => {
+        console.warn('SSDP socket error:', err)
+      })
 
       try {
         socket.bind(0, lanAddr, () => {
-          socket.setMulticastTTL(4)
+          socket.setMulticastTTL(MULTICAST_TTL)
           socket.setMulticastInterface(lanAddr)
           socket.setBroadcast(true)
-          try { socket.addMembership('239.255.255.250', lanAddr) } catch { /* ignore */ }
+          try {
+            socket.addMembership(SSDP_MULTICAST_ADDR, lanAddr)
+          } catch (err) {
+            console.warn('Failed to join SSDP multicast group:', err)
+          }
 
           const search = Buffer.from(
             'M-SEARCH * HTTP/1.1\r\n' +
-            'HOST: 239.255.255.250:1900\r\n' +
+            `HOST: ${SSDP_MULTICAST_ADDR}:${SSDP_PORT}\r\n` +
             'MAN: "ssdp:discover"\r\n' +
             'MX: 3\r\n' +
             'ST: urn:schemas-upnp-org:device:ZonePlayer:1\r\n' +
             '\r\n'
           )
 
-          socket.send(search, 0, search.length, 1900, '239.255.255.250')
-          socket.send(search, 0, search.length, 1900, '255.255.255.255')
+          socket.send(search, 0, search.length, SSDP_PORT, SSDP_MULTICAST_ADDR)
+          socket.send(search, 0, search.length, SSDP_PORT, '255.255.255.255')
         })
-      } catch { /* socket bind failed, skip SSDP */ }
+      } catch (err) {
+        console.warn('Failed to bind SSDP socket:', err)
+      }
 
       setTimeout(() => {
-        try { socket.close() } catch { /* ignore */ }
+        try { socket.close() } catch { /* best effort */ }
         resolve()
       }, timeout)
     })
+  }
 
-    // Fallback: TCP port scan on 1400 for local subnets
-    if (foundIps.size === 0) {
-      const subnets = getSubnets()
-      const scanPromises: Promise<void>[] = []
+  private tcpScan(foundIps: Set<string>): Promise<void> {
+    const subnets = getSubnets()
+    const scanPromises: Promise<void>[] = []
 
-      for (const cidr of subnets) {
-        const [base, prefixStr] = cidr.split('/')
-        const prefix = parseInt(prefixStr, 10)
-        if (prefix >= 24) {
-          const parts = base.split('.')
-          const networkPrefix = parts.slice(0, 3).join('.')
-          for (let i = 1; i <= 254; i++) {
-            const ip = `${networkPrefix}.${i}`
-            scanPromises.push(
-              new Promise((resolveScan) => {
-                const s = new net.Socket()
-                s.setTimeout(500)
-                s.on('connect', () => {
-                  foundIps.add(ip)
-                  s.destroy()
-                  resolveScan()
-                })
-                s.on('error', () => s.destroy())
-                s.on('timeout', () => s.destroy())
-                s.connect(1400, ip, () => {})
-                setTimeout(() => resolveScan(), 600)
-              })
-            )
-          }
+    for (const cidr of subnets) {
+      const [base, prefixStr] = cidr.split('/')
+      const prefix = parseInt(prefixStr, 10)
+      if (prefix >= 24) {
+        const parts = base.split('.')
+        const networkPrefix = parts.slice(0, 3).join('.')
+        for (let i = 1; i <= 254; i++) {
+          const ip = `${networkPrefix}.${i}`
+          scanPromises.push(this.tryConnect(ip, foundIps))
+        }
+      }
+    }
+
+    return Promise.all(scanPromises).then(() => {})
+  }
+
+  private tryConnect(ip: string, foundIps: Set<string>): Promise<void> {
+    return new Promise((resolve) => {
+      const s = new net.Socket()
+      let resolved = false
+
+      const done = () => {
+        if (!resolved) {
+          resolved = true
+          s.destroy()
+          resolve()
         }
       }
 
-      await Promise.all(scanPromises)
-    }
-
-    // Register all found devices
-    for (const ip of foundIps) {
-      try {
-        const device = new Sonos(ip)
-        await this.registerDevice(device)
-      } catch {
-        // skip unresponsive
-      }
-    }
-
-    return this.getDevices()
-  }
-
-  private async registerDevice(device: Sonos): Promise<void> {
-    try {
-      const desc = await device.deviceDescription()
-      const id = desc.UUID || device.host
-      const name = desc.roomName || desc.displayName || device.host
-      const group = (await device.getAllGroups())[0]?.Name || name
-
-      this.devices.set(id, device)
-      this.deviceInfo.set(id, {
-        id,
-        name,
-        ip: device.host,
-        model: desc.modelName || '',
-        group,
+      s.setTimeout(TCP_SCAN_TIMEOUT)
+      s.on('connect', () => {
+        foundIps.add(ip)
+        done()
       })
-      this.emit('device-found', this.deviceInfo.get(id))
-    } catch {
-      // skip unresponsive devices
-    }
+      s.on('error', done)
+      s.on('timeout', done)
+      s.connect(TCP_SCAN_PORT, ip)
+      setTimeout(done, TCP_SCAN_RESOLVE_DELAY)
+    })
   }
 
   getDevices(): SonosDevice[] {
@@ -203,7 +263,7 @@ class SonosController extends EventEmitter {
       ])
 
       return {
-        state: transportInfo as SonosStatus['state'],
+        state: normalizeSonosState(transportInfo),
         track: {
           title: trackInfo?.title || 'Unknown',
           artist: trackInfo?.artist || 'Unknown',
@@ -215,7 +275,8 @@ class SonosController extends EventEmitter {
         volume,
         muted,
       }
-    } catch {
+    } catch (err) {
+      console.warn('Failed to get Sonos status:', err)
       return null
     }
   }
@@ -250,7 +311,10 @@ class SonosController extends EventEmitter {
 
   async playUri(uri: string, title?: string): Promise<void> {
     const device = this.getDevice()
-    if (!device) return
+    if (!device) {
+      console.warn('Cannot play URI: no device selected')
+      return
+    }
 
     const trackTitle = title || uri.split('/').pop() || 'Music'
     const escapedTitle = trackTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -260,7 +324,8 @@ class SonosController extends EventEmitter {
     try {
       await device.setAVTransportURI({ uri, metadata })
     } catch (err) {
-      console.error('Failed to play URI:', err)
+      console.error(`Failed to play URI on ${device.host}:`, err)
+      throw err
     }
   }
 

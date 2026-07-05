@@ -5,6 +5,21 @@ import { queueManager, LoopMode } from '../services/queue-manager.js'
 import { getPlaylists, getPlaylist, createPlaylist, deletePlaylist, updatePlaylist } from '../services/playlist-store.js'
 import { audioGenService } from '../services/audio-gen.js'
 import { createMusicServerRouter } from '../services/music-server.js'
+import type { MusicTrack } from '../services/music-discovery.js'
+
+const VALID_LOOP_MODES: ReadonlySet<string> = new Set(['none', 'one', 'all'])
+
+function asString(v: unknown, fallback = ''): string {
+  return typeof v === 'string' ? v : fallback
+}
+
+function asNumber(v: unknown, fallback: number): number {
+  return typeof v === 'number' && !Number.isNaN(v) ? v : fallback
+}
+
+function asStringArray(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
+}
 
 export function createApiRouter(): Router {
   const router = Router()
@@ -20,7 +35,11 @@ export function createApiRouter(): Router {
   })
 
   router.post('/devices/select', (req, res) => {
-    const { id } = req.body as { id: string }
+    const id = asString(req.body?.id)
+    if (!id) {
+      res.status(400).json({ error: 'Device id is required' })
+      return
+    }
     const ok = sonosController.selectDevice(id)
     if (!ok) {
       res.status(404).json({ error: 'Device not found' })
@@ -29,8 +48,11 @@ export function createApiRouter(): Router {
     res.json({ success: true })
   })
 
-  router.get('/music', (_req, res) => {
-    res.json(getMusicLibrary())
+  router.get('/music', (req, res) => {
+    const all = getMusicLibrary()
+    const offset = Math.max(0, asNumber(req.query.offset ? Number(req.query.offset) : undefined, 0))
+    const limit = Math.max(1, Math.min(1000, asNumber(req.query.limit ? Number(req.query.limit) : undefined, all.length)))
+    res.json(all.slice(offset, offset + limit))
   })
 
   router.use('/music', createMusicServerRouter())
@@ -67,9 +89,14 @@ export function createApiRouter(): Router {
   })
 
   router.post('/volume', (req, res) => {
-    const { volume } = req.body as { volume: number }
-    const v = Math.max(0, Math.min(100, volume))
-    void sonosController.setVolume(v)
+    const volume = asNumber(req.body?.volume, -1)
+    if (volume < 0 || volume > 100) {
+      res.status(400).json({ error: 'Volume must be between 0 and 100' })
+      return
+    }
+    sonosController.setVolume(volume).catch(err => {
+      console.warn('Failed to set volume:', err)
+    })
     res.json({ success: true })
   })
 
@@ -78,13 +105,23 @@ export function createApiRouter(): Router {
   })
 
   router.post('/queue/add', (req, res) => {
-    const { trackIds } = req.body as { trackIds: string[] }
-    void queueManager.addToQueue(trackIds)
+    const trackIds = asStringArray(req.body?.trackIds)
+    if (trackIds.length === 0) {
+      res.status(400).json({ error: 'trackIds array is required' })
+      return
+    }
+    queueManager.addToQueue(trackIds).catch(err => {
+      console.warn('Failed to add to queue:', err)
+    })
     res.json({ success: true })
   })
 
   router.post('/queue/remove', (req, res) => {
-    const { index } = req.body as { index: number }
+    const index = asNumber(req.body?.index, -1)
+    if (index < 0) {
+      res.status(400).json({ error: 'Valid index is required' })
+      return
+    }
     queueManager.removeFromQueue(index)
     res.json({ success: true })
   })
@@ -95,20 +132,35 @@ export function createApiRouter(): Router {
   })
 
   router.post('/queue/reorder', (req, res) => {
-    const { from, to } = req.body as { from: number; to: number }
+    const from = asNumber(req.body?.from, -1)
+    const to = asNumber(req.body?.to, -1)
+    if (from < 0 || to < 0) {
+      res.status(400).json({ error: 'Valid from and to indices are required' })
+      return
+    }
     queueManager.reorderQueue(from, to)
     res.json({ success: true })
   })
 
   router.post('/queue/jump', (req, res) => {
-    const { trackId } = req.body as { trackId: string }
-    void queueManager.jumpTo(trackId)
+    const trackId = asString(req.body?.trackId)
+    if (!trackId) {
+      res.status(400).json({ error: 'trackId is required' })
+      return
+    }
+    queueManager.jumpTo(trackId).catch(err => {
+      console.warn('Failed to jump:', err)
+    })
     res.json({ success: true })
   })
 
   router.post('/loop', (req, res) => {
-    const { mode } = req.body as { mode: LoopMode }
-    queueManager.setLoopMode(mode)
+    const mode = asString(req.body?.mode)
+    if (!VALID_LOOP_MODES.has(mode)) {
+      res.status(400).json({ error: 'Mode must be one of: none, one, all' })
+      return
+    }
+    queueManager.setLoopMode(mode as LoopMode)
     res.json({ success: true })
   })
 
@@ -125,30 +177,47 @@ export function createApiRouter(): Router {
     res.json(playlist)
   })
 
-  router.post('/playlists', (req, res) => {
-    const { name, trackIds } = req.body as { name: string; trackIds?: string[] }
+  router.post('/playlists', async (req, res) => {
+    const name = asString(req.body?.name)
     if (!name) {
       res.status(400).json({ error: 'Name is required' })
       return
     }
-    void createPlaylist(name, trackIds).then(p => res.json(p))
+    const trackIds = asStringArray(req.body?.trackIds)
+    try {
+      const p = await createPlaylist(name, trackIds)
+      res.json(p)
+    } catch (err) {
+      console.warn('Failed to create playlist:', err)
+      res.status(500).json({ error: 'Failed to create playlist' })
+    }
   })
 
-  router.put('/playlists/:id', (req, res) => {
-    const { name, trackIds } = req.body as { name?: string; trackIds?: string[] }
-    void updatePlaylist(req.params.id, { name, trackIds }).then(p => {
+  router.put('/playlists/:id', async (req, res) => {
+    try {
+      const p = await updatePlaylist(req.params.id, {
+        name: asString(req.body?.name),
+        trackIds: asStringArray(req.body?.trackIds),
+      })
       if (!p) {
         res.status(404).json({ error: 'Playlist not found' })
         return
       }
       res.json(p)
-    })
+    } catch (err) {
+      console.warn('Failed to update playlist:', err)
+      res.status(500).json({ error: 'Failed to update playlist' })
+    }
   })
 
-  router.delete('/playlists/:id', (req, res) => {
-    void deletePlaylist(req.params.id).then(ok => {
+  router.delete('/playlists/:id', async (req, res) => {
+    try {
+      const ok = await deletePlaylist(req.params.id)
       res.json({ success: ok })
-    })
+    } catch (err) {
+      console.warn('Failed to delete playlist:', err)
+      res.status(500).json({ error: 'Failed to delete playlist' })
+    }
   })
 
   router.post('/playlists/:id/play', (req, res) => {
@@ -157,18 +226,24 @@ export function createApiRouter(): Router {
       res.status(404).json({ error: 'Playlist not found' })
       return
     }
+    const allTracks = getMusicLibrary()
     const tracks = playlist.trackIds
-      .map(id => getMusicLibrary().find(t => t.id === id))
-      .filter(Boolean) as import('../services/music-discovery.js').MusicTrack[]
+      .map(id => allTracks.find(t => t.id === id))
+      .filter((t): t is MusicTrack => !!t)
     queueManager.setQueue(tracks)
     res.json({ success: true })
   })
 
   router.post('/generate', (req, res) => {
-    const { prompt } = req.body as { prompt: string }
-    void audioGenService.generate({ prompt }).then(result => {
+    const prompt = asString(req.body?.prompt)
+    if (!prompt) {
+      res.status(400).json({ error: 'Prompt is required' })
+      return
+    }
+    audioGenService.generate({ prompt }).then(result => {
       res.json(result)
     }).catch(err => {
+      console.warn('Audio generation failed:', err)
       res.status(500).json({ error: err.message })
     })
   })

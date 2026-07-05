@@ -5,6 +5,8 @@ import { config } from '../config.js'
 
 export type LoopMode = 'none' | 'one' | 'all'
 
+const VALID_LOOP_MODES: ReadonlySet<string> = new Set(['none', 'one', 'all'])
+
 interface QueueState {
   queue: MusicTrack[]
   history: MusicTrack[]
@@ -20,6 +22,14 @@ class QueueManager extends EventEmitter {
     currentIndex: null,
     loopMode: 'all',
     autoPlay: true,
+  }
+
+  private mutationQueue: Promise<void> = Promise.resolve()
+
+  private serialized<T>(fn: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.mutationQueue = this.mutationQueue.then(() => fn().then(resolve, reject))
+    })
   }
 
   getState() {
@@ -57,8 +67,8 @@ class QueueManager extends EventEmitter {
   private getPreviousIndex(): number | null {
     const { queue, history } = this.state
     if (history.length > 0) {
-      const track = history.pop()!
-      this.state.history = [...history]
+      const track = history[history.length - 1]
+      this.state.history = history.slice(0, -1)
       const idx = queue.findIndex(t => t.id === track.id)
       return idx >= 0 ? idx : this.state.currentIndex
     }
@@ -80,16 +90,18 @@ class QueueManager extends EventEmitter {
       const streamUrl = `http://${config.host}:${config.port}/music-files/${track.baseIdx}/${encodedPath}`
       await sonosController.playUri(streamUrl, track.title)
     } catch (err) {
-      console.error('Failed to play track:', err)
+      console.error('Failed to play track:', track.id, track.title, err)
     }
   }
 
   async play(): Promise<void> {
-    if (this.state.currentIndex === null && this.state.queue.length > 0) {
-      await this.playTrack(0)
-    } else {
-      await sonosController.play()
-    }
+    await this.serialized(async () => {
+      if (this.state.currentIndex === null && this.state.queue.length > 0) {
+        await this.playTrack(0)
+      } else {
+        await sonosController.play()
+      }
+    })
   }
 
   async pause(): Promise<void> {
@@ -97,48 +109,63 @@ class QueueManager extends EventEmitter {
   }
 
   async stop(): Promise<void> {
-    await sonosController.stop()
-    this.state.currentIndex = null
-    this.emit('state-change', this.getState())
+    await this.serialized(async () => {
+      await sonosController.stop()
+      this.state.currentIndex = null
+      this.emit('state-change', this.getState())
+    })
   }
 
   async next(): Promise<void> {
-    const nextIdx = this.getNextIndex()
-    if (nextIdx === null) return
+    await this.serialized(async () => {
+      const nextIdx = this.getNextIndex()
+      if (nextIdx === null) return
 
-    const current = this.getCurrentTrack()
-    if (current) {
-      this.state.history = [...this.state.history, current]
-    }
-    await this.playTrack(nextIdx)
+      const current = this.getCurrentTrack()
+      if (current) {
+        this.state.history = [...this.state.history, current]
+      }
+      await this.playTrack(nextIdx)
+    })
   }
 
   async previous(): Promise<void> {
-    const prevIdx = this.getPreviousIndex()
-    if (prevIdx === null) return
+    await this.serialized(async () => {
+      const prevIdx = this.getPreviousIndex()
+      if (prevIdx === null) return
 
-    const current = this.getCurrentTrack()
-    if (current && this.state.history[this.state.history.length - 1]?.id !== current.id) {
-      this.state.history = [...this.state.history, current]
-    }
-    await this.playTrack(prevIdx)
+      const current = this.getCurrentTrack()
+      if (current && this.state.history[this.state.history.length - 1]?.id !== current.id) {
+        this.state.history = [...this.state.history, current]
+      }
+      await this.playTrack(prevIdx)
+    })
   }
 
   async addToQueue(trackIds: string[]): Promise<void> {
-    const tracks = trackIds.map(id => getTrackById(id)).filter((t): t is MusicTrack => !!t)
-    this.state.queue = [...this.state.queue, ...tracks]
-    this.emit('queue-change', this.getQueue())
+    await this.serialized(async () => {
+      const tracks = trackIds.map(id => getTrackById(id)).filter((t): t is MusicTrack => !!t)
+      if (tracks.length === 0) return
 
-    if (this.state.queue.length > 0 && this.state.currentIndex === null && this.state.autoPlay) {
-      await this.playTrack(0)
-    }
+      this.state.queue = [...this.state.queue, ...tracks]
+      this.emit('queue-change', this.getQueue())
+
+      if (this.state.queue.length > 0 && this.state.currentIndex === null && this.state.autoPlay) {
+        await this.playTrack(0)
+      }
+    })
   }
 
   removeFromQueue(index: number): void {
     if (index < 0 || index >= this.state.queue.length) return
+    if (!Number.isInteger(index)) return
 
     this.state.queue = this.state.queue.filter((_, i) => i !== index)
-    if (this.state.currentIndex !== null) {
+
+    if (this.state.queue.length === 0) {
+      this.state.currentIndex = null
+      this.state.history = []
+    } else if (this.state.currentIndex !== null) {
       if (index < this.state.currentIndex) {
         this.state.currentIndex--
       } else if (index === this.state.currentIndex) {
@@ -156,6 +183,10 @@ class QueueManager extends EventEmitter {
   }
 
   reorderQueue(from: number, to: number): void {
+    if (from < 0 || from >= this.state.queue.length) return
+    if (to < 0 || to >= this.state.queue.length) return
+    if (!Number.isInteger(from) || !Number.isInteger(to)) return
+
     const queue = [...this.state.queue]
     const [moved] = queue.splice(from, 1)
     queue.splice(to, 0, moved)
@@ -164,6 +195,10 @@ class QueueManager extends EventEmitter {
   }
 
   setLoopMode(mode: LoopMode): void {
+    if (!VALID_LOOP_MODES.has(mode)) {
+      console.warn('Invalid loop mode:', mode)
+      return
+    }
     this.state.loopMode = mode
     this.emit('loop-change', mode)
   }
@@ -173,9 +208,11 @@ class QueueManager extends EventEmitter {
   }
 
   async jumpTo(trackId: string): Promise<void> {
-    const idx = this.state.queue.findIndex(t => t.id === trackId)
-    if (idx === -1) return
-    await this.playTrack(idx)
+    await this.serialized(async () => {
+      const idx = this.state.queue.findIndex(t => t.id === trackId)
+      if (idx === -1) return
+      await this.playTrack(idx)
+    })
   }
 
   setQueue(tracks: MusicTrack[], startIndex = 0): void {
@@ -184,7 +221,9 @@ class QueueManager extends EventEmitter {
     this.state.currentIndex = null
     this.emit('queue-change', this.getQueue())
     if (tracks.length > 0) {
-      void this.playTrack(startIndex)
+      this.playTrack(startIndex).catch(err => {
+        console.error('Failed to start new queue:', err)
+      })
     }
   }
 }
@@ -192,28 +231,33 @@ class QueueManager extends EventEmitter {
 export const queueManager = new QueueManager()
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
-let lastTrackId: string | null = null
+const POLL_INTERVAL = 2000
+const AUTO_ADVANCE_THRESHOLD = 2
 
 export function startAutoAdvancePolling(): void {
   if (pollTimer) return
   pollTimer = setInterval(async () => {
-    const status = await sonosController.getStatus()
-    if (!status) return
+    try {
+      const status = await sonosController.getStatus()
+      if (!status) return
 
-    const current = queueManager.getCurrentTrack()
-    if (!current || status.state === 'PLAYING') return
+      const current = queueManager.getCurrentTrack()
+      if (!current || status.state === 'PLAYING') return
 
-    if (status.state === 'STOPPED' && status.track.duration > 0) {
-      const elapsed = status.track.position
-      const remaining = status.track.duration - elapsed
-      if (remaining < 2) {
-        const nextId = queueManager.getNextTrack()
-        if (nextId) {
-          await queueManager.next()
+      if (status.state === 'STOPPED' && status.track.duration > 0) {
+        const elapsed = status.track.position
+        const remaining = status.track.duration - elapsed
+        if (remaining < AUTO_ADVANCE_THRESHOLD) {
+          const nextId = queueManager.getNextTrack()
+          if (nextId) {
+            await queueManager.next()
+          }
         }
       }
+    } catch (err) {
+      console.warn('Auto-advance poll error:', err)
     }
-  }, 2000)
+  }, POLL_INTERVAL)
 }
 
 export function stopAutoAdvancePolling(): void {

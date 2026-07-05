@@ -6,7 +6,7 @@ import { discoverMusic } from './services/music-discovery.js'
 import { sonosController } from './services/sonos-controller.js'
 import { loadPlaylists } from './services/playlist-store.js'
 import { createApiRouter } from './routes/api.js'
-import { startAutoAdvancePolling } from './services/queue-manager.js'
+import { startAutoAdvancePolling, stopAutoAdvancePolling } from './services/queue-manager.js'
 
 const program = new Command()
 
@@ -21,24 +21,34 @@ program
 const options = program.opts()
 
 config.port = parseInt(options.port, 10) || 3000
-  if (options.host) config.host = options.host
-  config.musicPaths = options.path || []
+if (options.host) config.host = options.host
+config.musicPaths = options.path || []
 
-  config.musicPaths.forEach(p => {
-    if (p.includes(' ')) {
-      console.warn(`Warning: path "${p}" contains spaces — make sure it was quoted in the shell`)
-    }
-  })
+config.musicPaths.forEach(p => {
+  if (p.includes(' ')) {
+    console.warn(`Warning: path "${p}" contains spaces — ensure it was quoted in the shell`)
+  }
+})
+
+let server: ReturnType<typeof ViteExpress.listen> | null = null
 
 async function main() {
   console.log('Starting sonos-node...')
 
-  await loadPlaylists()
+  try {
+    await loadPlaylists()
+  } catch (err) {
+    console.warn('Could not load playlists, starting fresh:', err)
+  }
 
   if (config.musicPaths.length > 0) {
     console.log('Discovering music in:', config.musicPaths.join(', '))
-    const tracks = await discoverMusic(config.musicPaths)
-    console.log(`Found ${tracks.length} music files`)
+    try {
+      const tracks = await discoverMusic(config.musicPaths)
+      console.log(`Found ${tracks.length} music files`)
+    } catch (err) {
+      console.warn('Music discovery failed:', err)
+    }
   } else {
     console.log('No music paths specified. Use --path to add music folders.')
   }
@@ -55,18 +65,43 @@ async function main() {
     console.log(`Serving ${config.musicPaths.length} music director${config.musicPaths.length > 1 ? 'ies' : 'y'} at /music-files/*`)
   }
 
+  // Start device discovery in background (non-blocking)
   sonosController.discoverDevices().then(devices => {
     console.log(`Discovered ${devices.length} Sonos device(s)`)
     if (devices.length > 0) {
       console.log(`  ${devices.map(d => `${d.name} (${d.ip})`).join('\n  ')}`)
     }
+  }).catch(err => {
+    console.warn('Device discovery failed:', err)
   })
 
-  ViteExpress.listen(app, config.port, () => {
+  server = ViteExpress.listen(app, config.port, () => {
     console.log(`Sonos Node running at http://${config.host}:${config.port}`)
     startAutoAdvancePolling()
   })
 }
+
+function shutdown(): void {
+  console.log('\nShutting down gracefully...')
+  stopAutoAdvancePolling()
+
+  if (server) {
+    server.close(() => {
+      console.log('Server closed')
+      process.exit(0)
+    })
+    // Force exit after 5s if close hangs
+    setTimeout(() => {
+      console.warn('Forced shutdown after timeout')
+      process.exit(1)
+    }, 5000).unref()
+  } else {
+    process.exit(0)
+  }
+}
+
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)
 
 main().catch(err => {
   console.error('Failed to start:', err)

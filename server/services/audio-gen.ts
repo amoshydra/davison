@@ -15,6 +15,11 @@ export interface AudioGenerator {
   generate(request: AudioGenerationRequest): Promise<AudioGenerationResult>
 }
 
+interface ComfyUIResponse {
+  output?: { file?: string }
+  [key: string]: unknown
+}
+
 class ComfyUIGenerator extends EventEmitter implements AudioGenerator {
   private apiUrl: string
   private workflowTemplate: Record<string, unknown>
@@ -35,22 +40,30 @@ class ComfyUIGenerator extends EventEmitter implements AudioGenerator {
       ...(request.params || {}),
     }
 
-    const response = await fetch(`${this.apiUrl}/prompt`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: workflow }),
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 60000)
 
-    if (!response.ok) {
-      throw new Error(`ComfyUI API error: ${response.statusText}`)
-    }
+    try {
+      const response = await fetch(`${this.apiUrl}/prompt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: workflow }),
+        signal: controller.signal,
+      })
 
-    const result = await response.json() as Record<string, any>
-    this.emit('generation-complete', result)
+      if (!response.ok) {
+        throw new Error(`ComfyUI API error: ${response.statusText}`)
+      }
 
-    return {
-      filePath: result.output?.file || '',
-      duration: request.duration || 0,
+      const result = await response.json() as ComfyUIResponse
+      this.emit('generation-complete', result)
+
+      return {
+        filePath: result.output?.file || '',
+        duration: request.duration || 0,
+      }
+    } finally {
+      clearTimeout(timeout)
     }
   }
 }

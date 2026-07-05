@@ -82,7 +82,7 @@ export async function discoverMusic(paths: string[]): Promise<MusicTrack[]> {
 }
 
 export function getMusicLibrary(): MusicTrack[] {
-  return musicLibrary
+  return [...musicLibrary]
 }
 
 export function getTrackById(id: string): MusicTrack | undefined {

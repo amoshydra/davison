@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile, writeFile, mkdir, rename } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
@@ -12,7 +12,20 @@ export interface Playlist {
   updatedAt: string
 }
 
+const ALLOWED_UPDATES = new Set(['name', 'trackIds'])
+
 let playlists: Playlist[] = []
+
+function isValidPlaylistArray(data: unknown): data is Playlist[] {
+  if (!Array.isArray(data)) return false
+  return data.every(item =>
+    item !== null &&
+    typeof item === 'object' &&
+    typeof (item as Playlist).id === 'string' &&
+    typeof (item as Playlist).name === 'string' &&
+    Array.isArray((item as Playlist).trackIds),
+  )
+}
 
 export async function loadPlaylists(): Promise<void> {
   try {
@@ -22,23 +35,33 @@ export async function loadPlaylists(): Promise<void> {
       return
     }
     const data = await readFile(config.playlistsFile, 'utf-8')
-    playlists = JSON.parse(data)
-  } catch {
+    const parsed = JSON.parse(data)
+    if (isValidPlaylistArray(parsed)) {
+      playlists = parsed
+    } else {
+      console.warn('Corrupted playlists.json, starting fresh')
+      playlists = []
+    }
+  } catch (err) {
+    console.warn('Failed to load playlists:', err)
     playlists = []
   }
 }
 
 async function savePlaylists(): Promise<void> {
   await mkdir(config.dataDir, { recursive: true })
-  await writeFile(config.playlistsFile, JSON.stringify(playlists, null, 2), 'utf-8')
+  const tmp = config.playlistsFile + '.tmp'
+  await writeFile(tmp, JSON.stringify(playlists, null, 2), 'utf-8')
+  await rename(tmp, config.playlistsFile)
 }
 
 export function getPlaylists(): Playlist[] {
-  return [...playlists]
+  return playlists.map(p => ({ ...p }))
 }
 
 export function getPlaylist(id: string): Playlist | undefined {
-  return playlists.find(p => p.id === id)
+  const p = playlists.find(p => p.id === id)
+  return p ? { ...p } : undefined
 }
 
 export async function createPlaylist(name: string, trackIds: string[] = []): Promise<Playlist> {
@@ -51,7 +74,7 @@ export async function createPlaylist(name: string, trackIds: string[] = []): Pro
   }
   playlists.push(playlist)
   await savePlaylists()
-  return playlist
+  return { ...playlist }
 }
 
 export async function deletePlaylist(id: string): Promise<boolean> {
@@ -65,7 +88,14 @@ export async function deletePlaylist(id: string): Promise<boolean> {
 export async function updatePlaylist(id: string, updates: Partial<Playlist>): Promise<Playlist | null> {
   const playlist = playlists.find(p => p.id === id)
   if (!playlist) return null
-  Object.assign(playlist, updates, { updatedAt: new Date().toISOString() })
+
+  const safe: Record<string, unknown> = {}
+  for (const key of ALLOWED_UPDATES) {
+    if (key in updates) {
+      (safe as any)[key] = (updates as any)[key]
+    }
+  }
+  Object.assign(playlist, safe, { updatedAt: new Date().toISOString() })
   await savePlaylists()
-  return playlist
+  return { ...playlist }
 }
