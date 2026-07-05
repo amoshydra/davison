@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Music, ListMusic, Disc3, ListOrdered, Settings } from 'lucide-react'
 import { useDevices, useMusic, useStatus, usePlayback, usePlaylists } from './hooks/useSonosApi'
 import { DeviceSelector } from './components/DeviceSelector'
@@ -66,11 +66,30 @@ export function App() {
   const coverTrackId = sonos?.track.trackId || status.status?.queue.currentTrack?.id || null
   const coverUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
   const fallbackKey = sonos ? `${sonos.track.title}|${sonos.track.artist}|${sonos.track.album}` : ''
-  const coverBg = coverUrl
-    ? `url(${coverUrl})`
-    : fallbackKey
-      ? hashToGradient(fallbackKey)
-      : 'none'
+  const hashFallback = fallbackKey ? hashToGradient(fallbackKey) : 'none'
+
+  const [coverFailed, setCoverFailed] = useState(false)
+  const prevCoverUrl = useRef(coverUrl)
+
+  useEffect(() => {
+    if (coverUrl === prevCoverUrl.current && coverUrl !== null) return
+    prevCoverUrl.current = coverUrl
+
+    if (!coverUrl) {
+      setCoverFailed(true)
+      return
+    }
+
+    setCoverFailed(false)
+    const img = new Image()
+    img.onload = () => setCoverFailed(false)
+    img.onerror = () => setCoverFailed(true)
+    img.src = coverUrl
+
+    return () => { img.onload = null; img.onerror = null }
+  }, [coverUrl])
+
+  const coverBg = coverUrl && !coverFailed ? `url(${coverUrl})` : hashFallback
 
   return (
     <div className="app" style={{ '--cover-bg': coverBg } as React.CSSProperties}>
