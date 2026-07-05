@@ -316,8 +316,16 @@ body {
 }
 
 .np-progress-track {
-  position: relative; height: 32px;
+  position: relative; height: 44px;
   display: flex; align-items: center;
+}
+
+.np-progress-track::before {
+  content: '';
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  height: 3px; background: var(--surface3);
+  border-radius: 2px;
+  pointer-events: none;
 }
 
 .np-progress-fill {
@@ -326,41 +334,39 @@ body {
   border-radius: 2px;
   pointer-events: none;
   max-width: 100%;
+  z-index: 1;
 }
 
 .np-seek {
   -webkit-appearance: none; appearance: none;
-  width: 100%; height: 32px;
+  width: 100%; height: 44px;
   background: transparent;
   cursor: pointer;
   outline: none;
   position: relative;
-  z-index: 1;
-}
-
-/* Track background (visible behind thumb) */
-.np-seek::before {
-  content: '';
-  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  width: 100%; height: 3px;
-  background: var(--surface3);
-  border-radius: 2px;
+  z-index: 2;
+  margin: 0;
 }
 
 .np-seek::-webkit-slider-runnable-track {
   height: 3px;
-  background: var(--surface3);
-  border-radius: 2px;
+  background: transparent;
+  border: none;
 }
 
 .np-seek::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 20px; height: 20px;
+  width: 22px; height: 22px;
   border-radius: 50%;
   background: var(--accent);
-  margin-top: -8.5px;
+  margin-top: -9.5px;
   cursor: pointer;
-  box-shadow: 0 0 4px rgba(0,0,0,.3);
+  box-shadow: 0 0 6px rgba(0,0,0,.4);
+  transition: transform .12s;
+}
+
+.np-seek:active::-webkit-slider-thumb {
+  transform: scale(1.25);
 }
 
 .np-times {
