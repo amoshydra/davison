@@ -122,7 +122,7 @@ body {
 @media (hover: hover) { .sidebar-btn:hover { color: var(--text); background: var(--surface2); } }
 .sidebar-btn.active { color: var(--accent); background: var(--surface2); }
 
-@media (min-width: 768px) {
+@media (hover: hover) and (pointer: fine) {
   .sidebar { display: flex; }
   .bottom-nav { display: none !important; }
 }
