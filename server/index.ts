@@ -1,5 +1,7 @@
 import express from 'express'
 import ViteExpress from 'vite-express'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { config } from './config.js'
 import { discoverMusic } from './services/music-discovery.js'
@@ -34,6 +36,9 @@ config.musicPaths.forEach(p => {
 let server: ReturnType<typeof ViteExpress.listen> | null = null
 
 async function main() {
+  // Set cwd to package root so vite-express finds dist/ and vite.config
+  process.chdir(resolve(dirname(fileURLToPath(import.meta.url)), '..'))
+
   console.log('Starting davison...')
 
   try {
@@ -68,7 +73,7 @@ async function main() {
   }
 
   server = ViteExpress.listen(app, config.port, () => {
-    console.log(`Sonos Node running at http://${config.host}:${config.port}`)
+    console.log(`Davison running at http://${config.host}:${config.port}`)
     startAutoAdvancePolling()
   })
 }
