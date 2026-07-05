@@ -6,6 +6,7 @@ interface Props {
   tracks: MusicTrack[]
   onAddToQueue: (ids: string[]) => void
   onPlayNow: (id: string) => void
+  onPlayNext?: (ids: string[]) => void
 }
 
 interface DirNode {
@@ -107,6 +108,7 @@ function DirSection({
   onPlay,
   onToggle,
   onAddToQueue,
+  onPlayNext,
 }: {
   dir: DirNode
   depth: number
@@ -116,6 +118,7 @@ function DirSection({
   onPlay: (id: string) => void
   onToggle: (id: string) => void
   onAddToQueue: (ids: string[]) => void
+  onPlayNext?: (ids: string[]) => void
 }) {
   const [collapsed, setCollapsed] = useState(depth > 0)
 
@@ -175,6 +178,7 @@ function DirSection({
               onPlay={onPlay}
               onToggle={onToggle}
               onAddToQueue={onAddToQueue}
+              onPlayNext={onPlayNext}
             />
           ))}
           {dir.tracks.map(t => {
@@ -197,7 +201,7 @@ function DirSection({
   )
 }
 
-export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
+export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayNext }: Props) {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [selectMode, setSelectMode] = useState(false)
@@ -269,9 +273,19 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
       <div className="browser-actions">
         <span>{tracks.length} tracks</span>
         {selectMode && selected.size > 0 && (
-          <button onClick={() => { onAddToQueue(Array.from(selected)) }}>
-            Add {selected.size} to Queue
-          </button>
+          <>
+            <button onClick={() => { onPlayNow(Array.from(selected)[0]); exitSelectMode() }}>
+              Play
+            </button>
+            {onPlayNext && (
+              <button onClick={() => { onPlayNext(Array.from(selected)); exitSelectMode() }}>
+                Play Next
+              </button>
+            )}
+            <button onClick={() => { onAddToQueue(Array.from(selected)); exitSelectMode() }}>
+              Add {selected.size} to Queue
+            </button>
+          </>
         )}
         {selectMode && (
           <button className="browser-done" onClick={exitSelectMode}>
@@ -291,6 +305,7 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
             onPlay={handlePlay}
             onToggle={handleToggle}
             onAddToQueue={onAddToQueue}
+            onPlayNext={onPlayNext}
           />
         ))}
       </div>

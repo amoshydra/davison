@@ -154,6 +154,30 @@ export function createApiRouter(): Router {
     res.json({ success: true })
   })
 
+  router.post('/queue/play-now', (req, res) => {
+    const trackIds = asStringArray(req.body?.trackIds)
+    if (trackIds.length === 0) {
+      res.status(400).json({ error: 'trackIds array is required' })
+      return
+    }
+    queueManager.playNow(trackIds).catch(err => {
+      console.warn('Failed to play now:', err)
+    })
+    res.json({ success: true })
+  })
+
+  router.post('/queue/play-next', (req, res) => {
+    const trackIds = asStringArray(req.body?.trackIds)
+    if (trackIds.length === 0) {
+      res.status(400).json({ error: 'trackIds array is required' })
+      return
+    }
+    queueManager.playNext(trackIds).catch(err => {
+      console.warn('Failed to play next:', err)
+    })
+    res.json({ success: true })
+  })
+
   router.post('/loop', (req, res) => {
     const mode = asString(req.body?.mode)
     if (!VALID_LOOP_MODES.has(mode)) {

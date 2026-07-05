@@ -39,7 +39,7 @@ export function App() {
   }, [devices.selectedId])
 
   function handlePlayNow(trackId: string) {
-    playback.addToQueue([trackId])
+    playback.playNow([trackId])
     setView('now-playing')
   }
 
@@ -90,6 +90,7 @@ export function App() {
                 tracks={music.tracks}
                 onAddToQueue={playback.addToQueue}
                 onPlayNow={handlePlayNow}
+                onPlayNext={playback.playNext}
               />
             </div>
           )}

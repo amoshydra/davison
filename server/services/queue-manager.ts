@@ -142,17 +142,63 @@ class QueueManager extends EventEmitter {
     })
   }
 
+  private resolveTracks(trackIds: string[]): MusicTrack[] {
+    const seen = new Set<string>()
+    const result: MusicTrack[] = []
+    for (const id of trackIds) {
+      if (seen.has(id)) continue
+      seen.add(id)
+      const track = getTrackById(id)
+      if (track) result.push(track)
+    }
+    return result
+  }
+
   async addToQueue(trackIds: string[]): Promise<void> {
     await this.serialized(async () => {
-      const tracks = trackIds.map(id => getTrackById(id)).filter((t): t is MusicTrack => !!t)
+      const tracks = this.resolveTracks(trackIds)
       if (tracks.length === 0) return
 
-      this.state.queue = [...this.state.queue, ...tracks]
+      // Deduplicate against existing queue
+      const existingIds = new Set(this.state.queue.map(t => t.id))
+      const newTracks = tracks.filter(t => !existingIds.has(t.id))
+      if (newTracks.length === 0) return
+
+      this.state.queue = [...this.state.queue, ...newTracks]
       this.emit('queue-change', this.getQueue())
 
-      if (this.state.queue.length > 0 && this.state.currentIndex === null && this.state.autoPlay) {
+      if (this.state.currentIndex === null && this.state.autoPlay) {
         await this.playTrack(0)
       }
+    })
+  }
+
+  async playNow(trackIds: string[]): Promise<void> {
+    await this.serialized(async () => {
+      const tracks = this.resolveTracks(trackIds)
+      if (tracks.length === 0) return
+
+      this.state.queue = tracks
+      this.state.history = []
+      this.state.currentIndex = null
+      this.emit('queue-change', this.getQueue())
+      await this.playTrack(0)
+    })
+  }
+
+  async playNext(trackIds: string[]): Promise<void> {
+    await this.serialized(async () => {
+      const tracks = this.resolveTracks(trackIds)
+      if (tracks.length === 0) return
+
+      // Deduplicate against existing queue
+      const existingIds = new Set(this.state.queue.map(t => t.id))
+      const newTracks = tracks.filter(t => !existingIds.has(t.id))
+      if (newTracks.length === 0) return
+
+      const insertAt = this.state.currentIndex !== null ? this.state.currentIndex + 1 : this.state.queue.length
+      this.state.queue.splice(insertAt, 0, ...newTracks)
+      this.emit('queue-change', this.getQueue())
     })
   }
 

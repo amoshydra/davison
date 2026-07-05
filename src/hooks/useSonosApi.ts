@@ -128,6 +128,8 @@ export function usePlayback() {
     setVolume: (volume: number) => send('volume', { volume }),
     setLoop: (mode: LoopMode) => send('loop', { mode }),
     addToQueue: (trackIds: string[]) => send('queue/add', { trackIds }),
+    playNow: (trackIds: string[]) => send('queue/play-now', { trackIds }),
+    playNext: (trackIds: string[]) => send('queue/play-next', { trackIds }),
     removeFromQueue: (index: number) => send('queue/remove', { index }),
     clearQueue: () => send('queue/clear'),
     reorderQueue: (from: number, to: number) => send('queue/reorder', { from, to }),
