@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react'
-import { Check, ChevronRight, ChevronDown } from 'lucide-react'
+import { Check, Minus, ChevronRight, ChevronDown } from 'lucide-react'
 import type { MusicTrack } from '../types'
 
 interface Props {
@@ -150,6 +150,7 @@ function DirSection({
   selectMode,
   onPlay,
   onToggle,
+  onToggleMany,
   onAddToQueue,
   onPlayNext,
 }: {
@@ -160,6 +161,7 @@ function DirSection({
   selectMode: boolean
   onPlay: (id: string) => void
   onToggle: (id: string) => void
+  onToggleMany: (ids: string[]) => void
   onAddToQueue: (ids: string[]) => void
   onPlayNext?: (ids: string[]) => void
 }) {
@@ -169,6 +171,8 @@ function DirSection({
   const track = isLeaf ? dir.tracks[0] : null
 
   const allIds = useMemo(() => flattenIds(dir), [dir])
+  const allSelected = allIds.length > 0 && allIds.every(id => selected.has(id))
+  const someSelected = allIds.some(id => selected.has(id))
   const hasContent = useMemo(() => {
     if (!search) return true
     return dir.tracks.some(t => matches(t, search)) || dir.dirs.some(sub => {
@@ -204,6 +208,12 @@ function DirSection({
         <span className="dir-arrow">
           {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
         </span>
+        <span
+          className={`track-check${allSelected ? ' checked' : ''}`}
+          onClick={e => { e.stopPropagation(); onToggleMany(allIds) }}
+        >
+          {allSelected ? <Check size={14} /> : someSelected ? <Minus size={14} /> : null}
+        </span>
         <span className="dir-name">{dir.name}</span>
         <span className="dir-count">{allIds.length}</span>
         <span className="dir-actions" onClick={e => e.stopPropagation()}>
@@ -222,6 +232,7 @@ function DirSection({
               selectMode={selectMode}
               onPlay={onPlay}
               onToggle={onToggle}
+              onToggleMany={onToggleMany}
               onAddToQueue={onAddToQueue}
               onPlayNext={onPlayNext}
             />
@@ -273,6 +284,22 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNo
     setSelected(next)
     if (next.size === 0 && selectMode) {
       setSelectMode(false)
+    }
+  }
+
+  function toggleMany(ids: string[]) {
+    const allSel = ids.every(id => selected.has(id))
+    const next = new Set(selected)
+    if (allSel) {
+      for (const id of ids) next.delete(id)
+    } else {
+      for (const id of ids) next.add(id)
+    }
+    setSelected(next)
+    if (next.size === 0 && selectMode) {
+      setSelectMode(false)
+    } else if (!selectMode && next.size > 0) {
+      setSelectMode(true)
     }
   }
 
@@ -355,6 +382,7 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNo
             selectMode={selectMode}
             onPlay={handlePlay}
             onToggle={handleToggle}
+            onToggleMany={toggleMany}
             onAddToQueue={onAddToQueue}
             onPlayNext={onPlayNext}
           />
