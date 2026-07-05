@@ -235,10 +235,25 @@ body {
 @media (hover: hover) { .player-bar-controls button:hover { background: var(--surface2); } }
 
 .player-bar-volume {
-  display: none; align-items: center; gap: var(--sp-6);
-  flex-shrink: 0; color: var(--text2);
+  display: flex; align-items: center;
+  gap: var(--sp-4); flex-shrink: 0; color: var(--text3);
+  margin-left: var(--sp-4);
 }
-.player-bar-volume input[type="range"] { width: 80px; height: 4px; accent-color: var(--accent); cursor: pointer; }
+
+.pv-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--surface3); background: transparent;
+  border-radius: var(--sp-4); color: var(--text3);
+  cursor: pointer; transition: all .12s;
+}
+.pv-btn:active { background: var(--surface2); }
+
+.pv-value {
+  min-width: 22px; text-align: center;
+  font-size: .75rem; font-weight: 600; color: var(--text2);
+}
+
 @media (min-width: 480px) { .player-bar-volume { display: flex; } }
 
 /* ─── Now Playing ─── */
@@ -315,16 +330,25 @@ body {
   background: var(--accent); flex-shrink: 0;
 }
 
-/* ─── Volume (subtle, thin) ─── */
+/* ─── Volume buttons (replaces slider) ─── */
 .np-volume {
-  width: 100%; display: flex; align-items: center; gap: var(--sp-6);
-  color: var(--text3); font-size: .75rem;
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: var(--sp-8); color: var(--text3); font-size: .75rem;
 }
-.np-volume input[type="range"] {
-  flex: 1; height: 2px;
-  accent-color: var(--accent); cursor: pointer;
+
+.np-vol-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--surface3); background: transparent;
+  border-radius: var(--sp-6); color: var(--text2);
+  cursor: pointer; transition: all .12s;
 }
-.np-vol-value { min-width: 22px; text-align: right; font-size: .65rem; color: var(--text3); }
+.np-vol-btn:active { background: var(--surface2); border-color: var(--text3); }
+
+.np-vol-value {
+  min-width: 28px; text-align: center;
+  font-size: .85rem; font-weight: 600; color: var(--text);
+}
 
 /* ─── Controls ─── */
 .np-controls {

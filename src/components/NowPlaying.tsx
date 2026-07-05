@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, Volume2, ListMusic } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, Volume2, ListMusic, Minus, Plus } from 'lucide-react'
 import { useCallback, useState, useEffect, useRef } from 'react'
 import type { ServerStatus, LoopMode } from '../types'
 
@@ -42,7 +42,6 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
     onSetLoop(next[loopMode])
   }, [loopMode, onSetLoop])
 
-  // Swipe detection
   const touchStartX = useRef(0)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
@@ -61,10 +60,8 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Scrollable top content */}
       <div className="np-scroll">
         <div className="np-top">
-          {/* Hero */}
           <div className="np-hero">
             {coverUrl && !coverError ? (
               <img
@@ -78,7 +75,6 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
             )}
           </div>
 
-          {/* Track info */}
           <div className="np-info">
             {sonos ? (
               <>
@@ -94,7 +90,6 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
             )}
           </div>
 
-          {/* Up next (collapsible) */}
           {nextTracks.length > 0 && showUpNext && (
             <div className="np-upnext">
               <h4>Up next</h4>
@@ -112,23 +107,18 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
         </div>
       </div>
 
-      {/* Bottom section — always visible */}
       <div className="np-bottom">
-        {/* Volume (subtle) */}
         <div className="np-volume">
           <Volume2 size={14} />
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={volume}
-            onChange={e => onSetVolume(Number(e.target.value))}
-            aria-label="Volume"
-          />
+          <button className="np-vol-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
+            <Minus size={16} />
+          </button>
           <span className="np-vol-value">{volume}</span>
+          <button className="np-vol-btn" onClick={() => onSetVolume(Math.min(100, volume + 5))} aria-label="Volume up">
+            <Plus size={16} />
+          </button>
         </div>
 
-        {/* Controls */}
         <div className="np-controls">
           <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
             {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
@@ -148,7 +138,6 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
           </button>
         </div>
 
-        {/* Progress bar (at the very bottom) */}
         {sonos && (
           <div className="np-progress">
             <div className="np-progress-track">

@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, Music } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Music, Minus, Plus } from 'lucide-react'
 import { useState, useCallback, useEffect } from 'react'
 import type { MusicTrack, ServerStatus } from '../types'
 
@@ -25,8 +25,6 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
 
   useEffect(() => { setCoverError(false) }, [coverTrackId])
 
-  useEffect(() => { setCoverError(false) }, [coverTrackId])
-
   const handlePlayPause = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
     if (isPlaying) onPause()
@@ -36,9 +34,7 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   const handleNext = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onNext() }, [onNext])
   const handlePrevious = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onPrevious() }, [onPrevious])
 
-  if (!track) {
-    return null
-  }
+  if (!track) return null
 
   return (
     <div className="player-bar" onClick={onClickTrack}>
@@ -47,12 +43,7 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
         <div className="player-bar-track">
           <div className="player-bar-cover">
             {coverTrackId && !coverError ? (
-              <img
-                src={coverImgUrl!}
-                alt=""
-                className="player-bar-img"
-                onError={() => setCoverError(true)}
-              />
+              <img src={coverImgUrl!} alt="" className="player-bar-img" onError={() => setCoverError(true)} />
             ) : (
               <Music size={20} />
             )}
@@ -63,27 +54,20 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
           </div>
         </div>
         <div className="player-bar-controls" onClick={e => e.stopPropagation()}>
-          <button onClick={handlePrevious} title="Previous" aria-label="Previous track">
-            <SkipBack size={18} />
-          </button>
-          <button onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Play'} aria-label={isPlaying ? 'Pause' : 'Play'}>
+          <button onClick={handlePrevious} aria-label="Previous"><SkipBack size={18} /></button>
+          <button onClick={handlePlayPause} aria-label={isPlaying ? 'Pause' : 'Play'}>
             {isPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>
-          <button onClick={handleNext} title="Next" aria-label="Next track">
-            <SkipForward size={18} />
-          </button>
+          <button onClick={handleNext} aria-label="Next"><SkipForward size={18} /></button>
         </div>
-        <div className="player-bar-volume">
-          <Volume2 size={16} />
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={volume}
-            onClick={e => e.stopPropagation()}
-            onChange={e => onSetVolume(Number(e.target.value))}
-            aria-label="Volume"
-          />
+        <div className="player-bar-volume" onClick={e => e.stopPropagation()}>
+          <button className="pv-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
+            <Minus size={14} />
+          </button>
+          <span className="pv-value">{volume}</span>
+          <button className="pv-btn" onClick={() => onSetVolume(Math.min(100, volume + 5))} aria-label="Volume up">
+            <Plus size={14} />
+          </button>
         </div>
       </div>
     </div>
