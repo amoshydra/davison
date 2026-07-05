@@ -248,6 +248,18 @@ body {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
+.now-playing-device {
+  display: inline-flex; align-items: center; gap: var(--sp-4);
+  margin-top: var(--sp-8);
+  font-size: .7rem; color: var(--text3);
+}
+
+.now-playing-device::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+
 .now-playing-progress { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: var(--sp-4); }
 
 .now-playing-progress input[type="range"] {

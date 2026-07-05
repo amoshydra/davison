@@ -6,6 +6,7 @@ interface Props {
   status: ServerStatus | null
   volume: number
   loopMode: LoopMode
+  deviceName?: string
   onPlay: () => void
   onPause: () => void
   onNext: () => void
@@ -21,7 +22,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-export function NowPlayingView({ status, volume, loopMode, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop, onBack }: Props) {
+export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop, onBack }: Props) {
   const sonos = status?.sonos
   const queue = status?.queue.queue || []
   const currentIndex = status?.queue.currentIndex ?? -1
@@ -58,6 +59,7 @@ export function NowPlayingView({ status, volume, loopMode, onPlay, onPause, onNe
           <>
             <h2>{sonos.track.title}</h2>
             <p>{sonos.track.artist}</p>
+            {deviceName && <span className="now-playing-device">{deviceName}</span>}
           </>
         ) : (
           <>

@@ -93,6 +93,7 @@ export function App() {
               status={status.status}
               volume={vol}
               loopMode={status.status?.queue.loopMode || 'all'}
+              deviceName={devices.selectedDevice?.name}
               onPlay={playback.play}
               onPause={playback.pause}
               onNext={playback.next}
