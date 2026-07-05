@@ -1,4 +1,5 @@
 import createServer from 'nephele'
+import { ResourceNotFoundError, BadGatewayError, ForbiddenError } from 'nephele/dist/Errors/index.js'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
@@ -205,7 +206,7 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
 
     async readMetadataFile() { return {} },
     async writeMetadataFile() {},
-    async delete() { throw Object.assign(new Error('Forbidden'), { statusCode: 403 }) },
+    async delete() { throw new ForbiddenError('Forbidden') },
     async setProperty() {},
     async removeProperty() {},
     getProperties() {
@@ -332,7 +333,7 @@ class VirtualAdapter {
 
   async getResource(url: URL, baseUrl: URL) {
     const relPath = this.urlToRelativePath(url, baseUrl)
-    if (relPath == null) throw Object.assign(new Error('Bad Gateway'), { statusCode: 502 })
+    if (relPath == null) throw new BadGatewayError('Bad Gateway')
 
     const parts = relPath.split('/').filter(Boolean)
 
@@ -342,7 +343,7 @@ class VirtualAdapter {
     }
 
     const { node, trackIndex, realPath } = findNode(parts, this.tree)
-    if (!node && !realPath) throw Object.assign(new Error('Resource not found'), { statusCode: 404 })
+    if (!node && !realPath) throw new ResourceNotFoundError('Resource not found')
 
     const isCollection = !realPath
     const nodePath = '/' + parts.join('/')
@@ -367,8 +368,8 @@ class VirtualAdapter {
     return createVirtualResource(this, baseUrl, nodePath + '/', node, null, true)
   }
 
-  async newResource() { throw Object.assign(new Error('Forbidden'), { statusCode: 403 }) }
-  async newCollection() { throw Object.assign(new Error('Forbidden'), { statusCode: 403 }) }
+  async newResource() { throw new ForbiddenError('Forbidden') }
+  async newCollection() { throw new ForbiddenError('Forbidden') }
 }
 
 // ─── Server setup ───
