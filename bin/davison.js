@@ -24,9 +24,6 @@ if (existsSync(getHeadPath)) {
     }
   }
 }
-    }
-  }
-}
 
 // Auto-build if needed (first run from git clone)
 if (!existsSync(resolve(root, 'dist-server', 'index.js'))) {
