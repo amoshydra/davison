@@ -61,108 +61,117 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Hero */}
-      <div className="np-hero">
-        {coverUrl && !coverError ? (
-          <img
-            src={coverUrl}
-            alt=""
-            className="np-cover"
-            onError={() => setCoverError(true)}
-          />
-        ) : (
-          <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
-        )}
-      </div>
-
-      {/* Track info */}
-      <div className="np-info">
-        {sonos ? (
-          <>
-            <h2 className="np-title">{sonos.track.title}</h2>
-            <p className="np-artist">{sonos.track.artist}</p>
-            {deviceName && <span className="np-device">{deviceName}</span>}
-          </>
-        ) : (
-          <>
-            <h2 className="np-title">No track playing</h2>
-            <p className="np-artist">Select music to play</p>
-          </>
-        )}
-      </div>
-
-      {/* Progress */}
-      {sonos && (
-        <div className="np-progress">
-          <div className="np-progress-track">
-            <div className="np-track-bg" />
-            <div className="np-track-fill" style={{ width: `${progress}%` }} />
-            <div className="np-thumb" style={{ left: `${progress}%` }} />
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={progress}
-              className="np-seek"
-              aria-label="Seek"
+      {/* Top section */}
+      <div className="np-top">
+        {/* Hero */}
+        <div className="np-hero">
+          {coverUrl && !coverError ? (
+            <img
+              src={coverUrl}
+              alt=""
+              className="np-cover"
+              onError={() => setCoverError(true)}
             />
-          </div>
-          <div className="np-times">
-            <span>{formatTime(sonos.track.position)}</span>
-            <span>{formatTime(sonos.track.duration)}</span>
-          </div>
+          ) : (
+            <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
+          )}
         </div>
-      )}
 
-      {/* Controls */}
-      <div className="np-controls">
-        <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
-          {loopMode === 'one' ? <Repeat1 size={22} /> : <Repeat size={22} />}
-          {loopMode !== 'none' && <span className="np-badge" />}
-        </button>
-        <button className="np-btn" onClick={onPrevious} aria-label="Previous">
-          <SkipBack size={26} />
-        </button>
-        <button className="np-play" onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-          {isPlaying ? <Pause size={32} /> : <Play size={32} />}
-        </button>
-        <button className="np-btn" onClick={onNext} aria-label="Next">
-          <SkipForward size={26} />
-        </button>
-        <button className="np-btn" onClick={() => setShowUpNext(!showUpNext)} aria-label="Up next">
-          <ListMusic size={22} />
-        </button>
-      </div>
+        {/* Track info */}
+        <div className="np-info">
+          {sonos ? (
+            <>
+              <h2 className="np-title">{sonos.track.title}</h2>
+              <p className="np-artist">{sonos.track.artist}</p>
+              {deviceName && <span className="np-device">{deviceName}</span>}
+            </>
+          ) : (
+            <>
+              <h2 className="np-title">No track playing</h2>
+              <p className="np-artist">Select music to play</p>
+            </>
+          )}
+        </div>
 
-      {/* Volume */}
-      <div className="np-volume">
-        <Volume2 size={16} />
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={volume}
-          onChange={e => onSetVolume(Number(e.target.value))}
-          aria-label="Volume"
-        />
-        <span className="np-vol-value">{volume}</span>
-      </div>
-
-      {/* Up next (collapsible) */}
-      {nextTracks.length > 0 && showUpNext && (
-        <div className="np-upnext">
-          <h4>Up next</h4>
-          {nextTracks.map((t, i) => (
-            <div key={`${t.id}-${i}`} className="np-upnext-item">
-              <span className="np-upnext-num">{currentIndex + 2 + i}</span>
-              <div className="np-upnext-info">
-                <span>{t.title}</span>
-                <span>{t.artist}</span>
+        {/* Up next (collapsible) */}
+        {nextTracks.length > 0 && showUpNext && (
+          <div className="np-upnext">
+            <h4>Up next</h4>
+            {nextTracks.map((t, i) => (
+              <div key={`${t.id}-${i}`} className="np-upnext-item">
+                <span className="np-upnext-num">{currentIndex + 2 + i}</span>
+                <div className="np-upnext-info">
+                  <span>{t.title}</span>
+                  <span>{t.artist}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Spacer — pushes bottom section down */}
+      <div className="np-spacer" />
+
+      {/* Bottom section — always at the bottom */}
+      <div className="np-bottom">
+        {/* Volume (subtle) */}
+        <div className="np-volume">
+          <Volume2 size={14} />
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={volume}
+            onChange={e => onSetVolume(Number(e.target.value))}
+            aria-label="Volume"
+          />
+          <span className="np-vol-value">{volume}</span>
         </div>
-      )}
+
+        {/* Controls */}
+        <div className="np-controls">
+          <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
+            {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
+            {loopMode !== 'none' && <span className="np-badge" />}
+          </button>
+          <button className="np-btn" onClick={onPrevious} aria-label="Previous">
+            <SkipBack size={24} />
+          </button>
+          <button className="np-play" onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+            {isPlaying ? <Pause size={30} /> : <Play size={30} />}
+          </button>
+          <button className="np-btn" onClick={onNext} aria-label="Next">
+            <SkipForward size={24} />
+          </button>
+          <button className="np-btn" onClick={() => setShowUpNext(!showUpNext)} aria-label="Up next">
+            <ListMusic size={20} />
+          </button>
+        </div>
+
+        {/* Progress bar (at the very bottom) */}
+        {sonos && (
+          <div className="np-progress">
+            <div className="np-progress-track">
+              <div className="np-track-bg" />
+              <div className="np-track-fill" style={{ width: `${progress}%` }} />
+              <div className="np-thumb" style={{ left: `${progress}%` }} />
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={progress}
+                className="np-seek"
+                aria-label="Seek"
+              />
+            </div>
+            <div className="np-times">
+              <span>{formatTime(sonos.track.position)}</span>
+              <span>{formatTime(sonos.track.duration)}</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
