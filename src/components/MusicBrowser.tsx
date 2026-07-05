@@ -346,29 +346,6 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNo
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        {selectMode && (
-          <div className="browser-actions">
-            <span className="select-count">{selected.size} selected</span>
-            <button className="browser-done" onClick={exitSelectMode}>
-              Clear
-            </button>
-          </div>
-        )}
-        {selectMode && selected.size > 0 && (
-          <div className="select-actions-inline">
-            <button onClick={() => { onPlayNow(Array.from(selected)[0]); exitSelectMode() }}>
-              Play
-            </button>
-            {onPlayNext && (
-              <button onClick={() => { onPlayNext(Array.from(selected)); exitSelectMode() }}>
-                Play Next
-              </button>
-            )}
-            <button onClick={() => { onAddToQueue(Array.from(selected)); exitSelectMode() }}>
-              Add{selected.size > 1 ? ` ${selected.size}` : ''}
-            </button>
-          </div>
-        )}
       </div>
 
       <div className={`track-list${selectMode ? ' select-mode' : ''}`}>
@@ -388,6 +365,32 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNo
           />
         ))}
       </div>
+
+      {selectMode && (
+        <div className="select-bar">
+          <span className="select-bar-count">{selected.size} selected</span>
+          <div className="select-bar-actions">
+            {selected.size > 0 && (
+              <button className="select-bar-btn primary" onClick={() => { onPlayNow(Array.from(selected)[0]); exitSelectMode() }}>
+                Play
+              </button>
+            )}
+            {selected.size > 0 && onPlayNext && (
+              <button className="select-bar-btn" onClick={() => { onPlayNext(Array.from(selected)); exitSelectMode() }}>
+                Play Next
+              </button>
+            )}
+            {selected.size > 0 && (
+              <button className="select-bar-btn" onClick={() => { onAddToQueue(Array.from(selected)); exitSelectMode() }}>
+                Add{selected.size > 1 ? ` ${selected.size}` : ''}
+              </button>
+            )}
+            <button className="select-bar-btn subtle" onClick={exitSelectMode}>
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
