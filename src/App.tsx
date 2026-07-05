@@ -148,18 +148,20 @@ export function App() {
       </div>
       </div>
 
-      {/* Bottom player bar */}
-      <PlayerBar
-        status={status.status}
-        volume={vol}
-        deviceName={devices.selectedDevice?.name}
-        onPlay={playback.play}
-        onPause={playback.pause}
-        onNext={playback.next}
-        onPrevious={playback.previous}
-        onSetVolume={playback.setVolume}
-        onClickTrack={() => setView('now-playing')}
-      />
+      {/* Bottom player bar — hidden when now-playing is active (duplicate controls) */}
+      {view !== 'now-playing' && (
+        <PlayerBar
+          status={status.status}
+          volume={vol}
+          deviceName={devices.selectedDevice?.name}
+          onPlay={playback.play}
+          onPause={playback.pause}
+          onNext={playback.next}
+          onPrevious={playback.previous}
+          onSetVolume={playback.setVolume}
+          onClickTrack={() => setView('now-playing')}
+        />
+      )}
     </div>
   )
 }
