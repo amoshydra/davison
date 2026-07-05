@@ -70,7 +70,10 @@ export async function discoverMusic(paths: string[]): Promise<MusicTrack[]> {
     try {
       const stats = await stat(resolved)
       if (stats.isDirectory()) {
-        const baseName = path.basename(resolved)
+        const parentDir = path.basename(path.dirname(resolved))
+        const baseName = parentDir && parentDir !== path.sep
+          ? `${parentDir}/${path.basename(resolved)}`
+          : path.basename(resolved)
         all.push(...await walkDir(resolved, resolved, i, baseName))
       }
     } catch {
