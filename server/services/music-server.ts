@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
+import { parseFile } from 'music-metadata'
 import { getTrackById } from './music-discovery.js'
 
 export function createMusicServerRouter(): Router {
@@ -67,6 +68,30 @@ export function createMusicServerRouter(): Router {
     } catch {
       if (!res.headersSent) {
         res.status(500).json({ error: 'Failed to stream file' })
+      }
+    }
+  })
+
+  router.get('/cover/:id', async (req, res) => {
+    const track = getTrackById(req.params.id)
+    if (!track) {
+      res.status(404).json({ error: 'Track not found' })
+      return
+    }
+
+    try {
+      const meta = await parseFile(track.filePath)
+      const pic = meta.common.picture?.[0]
+      if (!pic) {
+        res.status(404).json({ error: 'No cover art' })
+        return
+      }
+      res.set('Content-Type', pic.format)
+      res.set('Cache-Control', 'public, max-age=86400')
+      res.end(pic.data)
+    } catch {
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to extract cover' })
       }
     }
   })

@@ -39,7 +39,16 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
       <div className="player-bar-content">
         <div className="player-bar-track">
           <div className="player-bar-cover">
-            <Music size={20} />
+            {status?.queue.currentTrack ? (
+              <img
+                src={`/api/music/cover/${status.queue.currentTrack.id}`}
+                alt=""
+                className="player-bar-img"
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+              />
+            ) : (
+              <Music size={20} />
+            )}
           </div>
           <div className="player-bar-text">
             <span className="player-bar-title">{track.title}</span>

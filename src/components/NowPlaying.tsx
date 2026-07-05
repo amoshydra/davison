@@ -26,9 +26,11 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
   const sonos = status?.sonos
   const queue = status?.queue.queue || []
   const currentIndex = status?.queue.currentIndex ?? -1
+  const currentTrack = status?.queue.currentTrack
   const isPlaying = sonos?.state === 'PLAYING'
 
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
+  const coverUrl = currentTrack ? `/api/music/cover/${currentTrack.id}` : null
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     // seeking not implemented on server yet
@@ -51,7 +53,11 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       )}
 
       <div className="now-playing-hero">
-        <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
+        {coverUrl ? (
+          <img src={coverUrl} alt="Album art" className="now-playing-cover" />
+        ) : (
+          <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
+        )}
       </div>
 
       <div className="now-playing-info">
