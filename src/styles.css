@@ -260,40 +260,24 @@ body {
 .now-playing-view {
   display: flex; flex-direction: column;
   flex: 1; min-width: 0;
-  padding: var(--sp-16);
   touch-action: pan-y;
   overflow: hidden;
 }
 
-/* Scrollable top section — hero + info */
+/* Scrollable area — hero, info, progress, up next */
 .np-scroll {
   flex: 1; min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-.np-top {
+  padding: var(--sp-16) var(--sp-16) 0;
   display: flex; flex-direction: column; align-items: center;
-  gap: var(--sp-8);
-  padding-bottom: var(--sp-12);
-}
-
-/* Bottom section — always at the bottom */
-.np-bottom {
-  display: flex; flex-direction: column;
-  gap: var(--sp-4);
-}
-
-.np-controls-row {
-  display: flex; align-items: center;
-  gap: var(--sp-8);
+  gap: var(--sp-6);
 }
 
 .np-hero {
-  width: min(65vw, 280px);
+  width: min(65vw, 260px);
   aspect-ratio: 1;
   flex-shrink: 0;
-  margin: var(--sp-4) 0;
 }
 
 .np-cover {
@@ -334,34 +318,104 @@ body {
   background: var(--accent); flex-shrink: 0;
 }
 
-/* ─── Volume buttons (replaces slider) ─── */
-.np-volume {
+/* Progress */
+.np-progress { width: 100%; }
+.np-progress-track {
+  position: relative; height: 40px;
   display: flex; align-items: center;
-  gap: var(--sp-4); margin-left: auto;
+  min-width: 0;
+}
+.np-track-bg {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  height: 5px; background: var(--surface2);
+  border-radius: 3px;
+  pointer-events: none;
+}
+.np-track-fill {
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  height: 5px; background: var(--accent);
+  border-radius: 3px;
+  pointer-events: none;
+  max-width: 100%;
+  box-shadow: 0 0 10px rgba(6, 182, 212, .25);
+}
+.np-thumb {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(6, 182, 212, .35);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform .12s;
+}
+.np-seek:active + .np-thumb,
+.np-seek:focus-visible + .np-thumb {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+.np-seek {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 100%;
+  background: transparent; cursor: pointer; outline: none;
+  position: absolute; top: 0; left: 0;
+  z-index: 2; margin: 0; opacity: 0;
+}
+.np-seek::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 44px; height: 44px; cursor: pointer;
+}
+.np-seek::-moz-range-thumb {
+  width: 44px; height: 44px; border: none; border-radius: 0; cursor: pointer;
+}
+.np-seek::-moz-range-track {
+  background: transparent; border: none; height: 44px;
 }
 
-.np-vol-btn {
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--surface3); background: transparent;
-  border-radius: var(--sp-6); color: var(--text2);
-  cursor: pointer; transition: all .12s;
-}
-.np-vol-btn:active { background: var(--surface2); border-color: var(--text3); }
-
-.np-vol-value {
-  min-width: 24px; text-align: center;
-  font-size: .8rem; font-weight: 600; color: var(--text);
+.np-times {
+  display: flex; justify-content: space-between;
+  font-size: .65rem; color: var(--text3);
+  margin-top: var(--sp-1);
 }
 
-/* ─── Controls ─── */
-.np-controls {
-  display: flex; align-items: center; justify-content: center;
-  gap: var(--sp-6);
+/* Up next */
+.np-upnext {
+  width: 100%; padding-bottom: var(--sp-8);
+}
+.np-upnext h4 {
+  font-size: .7rem; font-weight: 600; color: var(--text2);
+  margin-bottom: var(--sp-4);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.np-upnext-item {
+  display: flex; align-items: center; gap: var(--sp-6);
+  padding: var(--sp-2) 0;
+}
+.np-upnext-item + .np-upnext-item {
+  border-top: 1px solid var(--surface2);
+}
+.np-upnext-num { font-size: .65rem; color: var(--text3); min-width: 16px; text-align: center; }
+.np-upnext-info { flex: 1; min-width: 0; }
+.np-upnext-info span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-upnext-info span:first-child { font-size: .8rem; }
+.np-upnext-info span:last-child { font-size: .65rem; color: var(--text3); }
+
+/* Bottom row — pinned */
+.np-bottom-row {
+  display: flex; align-items: center;
+  padding: var(--sp-6) var(--sp-16);
+  gap: var(--sp-8);
+  border-top: 1px solid var(--surface3);
+  background: rgba(13, 13, 13, .6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.np-bottom-controls {
+  display: flex; align-items: center;
+  gap: var(--sp-4);
 }
 
 .np-btn {
-  width: 44px; height: 44px;
+  width: 40px; height: 40px;
   display: flex; align-items: center; justify-content: center;
   border: none; background: transparent;
   color: var(--text); cursor: pointer;
@@ -371,13 +425,13 @@ body {
 .np-btn:active { background: var(--surface2); }
 
 .np-badge {
-  position: absolute; top: 6px; right: 6px;
+  position: absolute; top: 5px; right: 5px;
   width: 5px; height: 5px; border-radius: 50%;
   background: var(--accent);
 }
 
 .np-play {
-  width: 56px; height: 56px;
+  width: 52px; height: 52px;
   display: flex; align-items: center; justify-content: center;
   border: none; background: var(--accent); color: var(--bg);
   cursor: pointer; border-radius: 50%;
@@ -385,92 +439,25 @@ body {
 }
 .np-play:active { transform: scale(.95); }
 
-/* ─── Progress (prominent, at very bottom) ─── */
-.np-progress {
-  width: 100%; display: flex; flex-direction: column; gap: var(--sp-2);
-}
-
-.np-progress-track {
-  position: relative; height: 48px;
+/* Volume in bottom row */
+.np-bottom-volume {
   display: flex; align-items: center;
-  min-width: 0;
+  gap: var(--sp-2); margin-left: auto;
 }
 
-/* Gray background track — thicker */
-.np-track-bg {
-  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-  height: 6px; background: var(--surface2);
-  border-radius: 3px;
-  pointer-events: none;
+.nv-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--surface3); background: transparent;
+  border-radius: var(--sp-4); color: var(--text3);
+  cursor: pointer; transition: all .12s;
 }
+.nv-btn:active { background: var(--surface2); border-color: var(--text3); }
 
-/* Accent fill — thicker, with glow */
-.np-track-fill {
-  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  height: 6px; background: var(--accent);
-  border-radius: 3px;
-  pointer-events: none;
-  max-width: 100%;
-  box-shadow: 0 0 12px rgba(6, 182, 212, .3);
+.nv-value {
+  min-width: 22px; text-align: center;
+  font-size: .75rem; font-weight: 600; color: var(--text2);
 }
-
-/* Visual thumb */
-.np-thumb {
-  position: absolute; top: 50%; transform: translate(-50%, -50%);
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px rgba(6, 182, 212, .4);
-  pointer-events: none;
-  z-index: 1;
-  transition: transform .12s;
-}
-
-.np-seek:active + .np-thumb,
-.np-seek:focus-visible + .np-thumb {
-  transform: translate(-50%, -50%) scale(1.3);
-}
-
-/* Invisible input overlay */
-.np-seek {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 100%;
-  background: transparent; cursor: pointer; outline: none;
-  position: absolute; top: 0; left: 0;
-  z-index: 2; margin: 0; opacity: 0;
-}
-.np-seek::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 48px; height: 48px; cursor: pointer;
-}
-.np-seek::-moz-range-thumb {
-  width: 48px; height: 48px; border: none; border-radius: 0; cursor: pointer;
-}
-.np-seek::-moz-range-track {
-  background: transparent; border: none; height: 48px;
-}
-
-.np-times {
-  display: flex; justify-content: space-between;
-  font-size: .65rem; color: var(--text3);
-}
-
-/* ─── Up next ─── */
-.np-upnext {
-  width: 100%; margin-top: var(--sp-8);
-}
-.np-upnext h4 {
-  font-size: .7rem; font-weight: 600; color: var(--text2);
-  margin-bottom: var(--sp-4); text-transform: uppercase; letter-spacing: .04em;
-}
-.np-upnext-item {
-  display: flex; align-items: center; gap: var(--sp-6);
-  padding: var(--sp-2) 0;
-}
-.np-upnext-num { font-size: .65rem; color: var(--text3); min-width: 16px; text-align: center; }
-.np-upnext-info { flex: 1; min-width: 0; }
-.np-upnext-info span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.np-upnext-info span:first-child { font-size: .8rem; }
-.np-upnext-info span:last-child { font-size: .65rem; color: var(--text3); }
 
 /* ─── Music Browser ─── */
 .music-browser { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }

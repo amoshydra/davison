@@ -27,7 +27,6 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
   const currentIndex = status?.queue.currentIndex ?? -1
   const currentTrack = status?.queue.currentTrack
   const isPlaying = sonos?.state === 'PLAYING'
-  const [showUpNext, setShowUpNext] = useState(false)
 
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
   const coverUrl = (sonos?.track.trackId || currentTrack?.id) ? `/api/music/cover/${sonos?.track.trackId || currentTrack?.id}` : null
@@ -35,7 +34,7 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
 
   useEffect(() => { setCoverError(false) }, [sonos?.track.trackId, currentTrack?.id])
 
-  const nextTracks = currentIndex >= 0 ? queue.slice(currentIndex + 1, currentIndex + 10) : []
+  const nextTracks = currentIndex >= 0 ? queue.slice(currentIndex + 1, currentIndex + 5) : []
 
   const toggleLoop = useCallback(() => {
     const next: Record<LoopMode, LoopMode> = { none: 'one', one: 'all', all: 'none' }
@@ -60,84 +59,39 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Scrollable content */}
       <div className="np-scroll">
-        <div className="np-top">
-          <div className="np-hero">
-            {coverUrl && !coverError ? (
-              <img
-                src={coverUrl}
-                alt=""
-                className="np-cover"
-                onError={() => setCoverError(true)}
-              />
-            ) : (
-              <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
-            )}
-          </div>
-
-          <div className="np-info">
-            {sonos ? (
-              <>
-                <h2 className="np-title">{sonos.track.title}</h2>
-                <p className="np-artist">{sonos.track.artist}</p>
-                {deviceName && <span className="np-device">{deviceName}</span>}
-              </>
-            ) : (
-              <>
-                <h2 className="np-title">No track playing</h2>
-                <p className="np-artist">Select music to play</p>
-              </>
-            )}
-          </div>
-
-          {nextTracks.length > 0 && showUpNext && (
-            <div className="np-upnext">
-              <h4>Up next</h4>
-              {nextTracks.map((t, i) => (
-                <div key={`${t.id}-${i}`} className="np-upnext-item">
-                  <span className="np-upnext-num">{currentIndex + 2 + i}</span>
-                  <div className="np-upnext-info">
-                    <span>{t.title}</span>
-                    <span>{t.artist}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Hero */}
+        <div className="np-hero">
+          {coverUrl && !coverError ? (
+            <img
+              src={coverUrl}
+              alt=""
+              className="np-cover"
+              onError={() => setCoverError(true)}
+            />
+          ) : (
+            <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
           )}
         </div>
-      </div>
 
-      <div className="np-bottom">
-        <div className="np-controls-row">
-          <div className="np-controls">
-            <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
-              {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
-              {loopMode !== 'none' && <span className="np-badge" />}
-            </button>
-            <button className="np-btn" onClick={onPrevious} aria-label="Previous">
-              <SkipBack size={24} />
-            </button>
-            <button className="np-play" onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-              {isPlaying ? <Pause size={30} /> : <Play size={30} />}
-            </button>
-            <button className="np-btn" onClick={onNext} aria-label="Next">
-              <SkipForward size={24} />
-            </button>
-            <button className="np-btn" onClick={() => setShowUpNext(!showUpNext)} aria-label="Up next">
-              <ListMusic size={20} />
-            </button>
-          </div>
-          <div className="np-volume">
-            <button className="np-vol-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
-              <Minus size={14} />
-            </button>
-            <span className="np-vol-value">{volume}</span>
-            <button className="np-vol-btn" onClick={() => onSetVolume(Math.min(100, volume + 5))} aria-label="Volume up">
-              <Plus size={14} />
-            </button>
-          </div>
+        {/* Track info */}
+        <div className="np-info">
+          {sonos ? (
+            <>
+              <h2 className="np-title">{sonos.track.title}</h2>
+              <p className="np-artist">{sonos.track.artist}</p>
+              {deviceName && <span className="np-device">{deviceName}</span>}
+            </>
+          ) : (
+            <>
+              <h2 className="np-title">No track playing</h2>
+              <p className="np-artist">Select music to play</p>
+            </>
+          )}
         </div>
 
+        {/* Progress */}
         {sonos && (
           <div className="np-progress">
             <div className="np-progress-track">
@@ -159,6 +113,50 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
             </div>
           </div>
         )}
+
+        {/* Up next — always visible */}
+        {nextTracks.length > 0 && (
+          <div className="np-upnext">
+            <h4>Up next</h4>
+            {nextTracks.map((t, i) => (
+              <div key={`${t.id}-${i}`} className="np-upnext-item">
+                <span className="np-upnext-num">{currentIndex + 2 + i}</span>
+                <div className="np-upnext-info">
+                  <span>{t.title}</span>
+                  <span>{t.artist}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom row — pinned */}
+      <div className="np-bottom-row">
+        <div className="np-bottom-controls">
+          <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
+            {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
+            {loopMode !== 'none' && <span className="np-badge" />}
+          </button>
+          <button className="np-btn" onClick={onPrevious} aria-label="Previous">
+            <SkipBack size={22} />
+          </button>
+          <button className="np-play" onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+            {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+          </button>
+          <button className="np-btn" onClick={onNext} aria-label="Next">
+            <SkipForward size={22} />
+          </button>
+        </div>
+        <div className="np-bottom-volume">
+          <button className="nv-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
+            <Minus size={13} />
+          </button>
+          <span className="nv-value">{volume}</span>
+          <button className="nv-btn" onClick={() => onSetVolume(Math.min(100, volume + 5))} aria-label="Volume up">
+            <Plus size={13} />
+          </button>
+        </div>
       </div>
     </div>
   )
