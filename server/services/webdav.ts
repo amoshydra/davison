@@ -155,7 +155,10 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
       return new Date()
     },
 
-    async getEtag() { return `${nodePath.replace(/\//g, '_')}` },
+    async getEtag() {
+      const { createHash } = await import('node:crypto')
+      return createHash('md5').update(nodePath).digest('hex')
+    },
 
     async getContentType() {
       if (realPath) return mime.getType(realPath) || 'application/octet-stream'
@@ -221,8 +224,10 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
           case 'getcontenttype':
             if (realPath) return mime.getType(realPath) || 'application/octet-stream'
             return 'httpd/unix-directory'
-          case 'getetag':
-            return nodePath.replace(/\//g, '_')
+          case 'getetag': {
+            const { createHash } = await import('node:crypto')
+            return createHash('md5').update(nodePath).digest('hex')
+          }
           case 'resourcetype':
             return isCollection ? { collection: {} } : undefined
           case 'displayname':
