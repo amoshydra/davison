@@ -140,7 +140,7 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
 
     async getSize() {
       if (realPath) { await ensureStats(); return cachedSize || 0 }
-      return 4096
+      return 0
     },
 
     async getLength() { return this.getSize() },
@@ -170,7 +170,6 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
         return Readable.from([])
       }
       if (range) {
-        const { createReadStream } = await import('node:fs')
         return createReadStream(realPath, { start: range.start, end: range.end })
       }
       return createReadStream(realPath)
