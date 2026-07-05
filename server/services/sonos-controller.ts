@@ -26,8 +26,6 @@ export interface SonosStatus {
   muted: boolean
 }
 
-const VALID_STATES: ReadonlySet<string> = new Set(['PLAYING', 'PAUSED_PLAYBACK', 'STOPPED'])
-
 const SSDP_MULTICAST_ADDR = '239.255.255.250'
 const SSDP_PORT = 1900
 const SONOS_UPNP_PORT = 1400
@@ -69,7 +67,10 @@ function getSubnets(): string[] {
 }
 
 function normalizeSonosState(state: string): SonosStatus['state'] {
-  if (VALID_STATES.has(state)) return state as SonosStatus['state']
+  const upper = state.toUpperCase()
+  if (upper === 'PLAYING') return 'PLAYING'
+  if (upper === 'PAUSED_PLAYBACK') return 'PAUSED_PLAYBACK'
+  if (upper === 'STOPPED') return 'STOPPED'
   console.warn('Unknown Sonos state:', state)
   return 'STOPPED'
 }
