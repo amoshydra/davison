@@ -38,13 +38,15 @@ export function App() {
     if (devices.selectedId) status.startPolling()
   }, [devices.selectedId])
 
-  function handlePlayNow(trackId: string) {
-    playback.playNow([trackId])
+  async function handlePlayNow(trackId: string) {
+    await playback.playNow([trackId])
+    await status.fetchStatus()
     setView('now-playing')
   }
 
-  function handleFolderOrNow(trackId: string) {
-    playback.playFolderOrNow(trackId)
+  async function handleFolderOrNow(trackId: string) {
+    await playback.playFolderOrNow(trackId)
+    await status.fetchStatus()
     setView('now-playing')
   }
 
