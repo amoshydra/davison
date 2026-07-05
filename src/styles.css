@@ -452,7 +452,7 @@ body {
 
 /* ─── Up next ─── */
 .np-upnext {
-  width: 100%; margin-top: var(--sp-4);
+  width: 100%; margin-top: var(--sp-8);
 }
 .np-upnext h4 {
   font-size: .7rem; font-weight: 600; color: var(--text2);
@@ -467,18 +467,6 @@ body {
 .np-upnext-info span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .np-upnext-info span:first-child { font-size: .8rem; }
 .np-upnext-info span:last-child { font-size: .65rem; color: var(--text3); }
-  padding: var(--sp-6) 0; border-bottom: 1px solid var(--surface2);
-}
-.now-playing-upnext-item:last-child { border-bottom: none; }
-
-.now-playing-upnext-item span:first-child {
-  font-size: .75rem; color: var(--text3); min-width: 20px;
-}
-
-.upnext-info { flex: 1; min-width: 0; }
-.upnext-info span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.upnext-info span:first-child { font-size: .85rem; }
-.upnext-info span:last-child { font-size: .7rem; color: var(--text3); }
 
 /* ─── Music Browser ─── */
 .music-browser { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
@@ -551,11 +539,6 @@ body {
 .track-list::-webkit-scrollbar { width: 4px; }
 .track-list::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: var(--sp-2); }
 
-@media (min-width: 768px) {
-  .select-actions { left: 64px; justify-content: flex-start; }
-  .select-actions button { max-width: 160px; }
-}
-
 /* Checkbox */
 .track-check {
   width: var(--checkbox-w); height: var(--checkbox-w);
@@ -593,7 +576,7 @@ body {
 
 .dir-header {
   display: flex; align-items: center; gap: var(--sp-6);
-  padding: var(--sp-8) var(--sp-12);
+  padding: var(--sp-8) var(--sp-16);
   padding-left: calc(var(--hd-px) + var(--depth, 0) * var(--indent));
   cursor: pointer; transition: background .12s;
   font-size: .9rem; font-weight: 600; color: var(--text2); user-select: none;
@@ -636,7 +619,8 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: var(--r-md);
-  padding: var(--p-card); margin: 0 var(--sp-16) var(--sp-16);
+  padding: var(--p-card);
+  margin: 0 var(--sp-16) var(--sp-12);
   display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0;
 }
 
@@ -716,7 +700,7 @@ body {
 
 .playlist-item {
   display: flex; align-items: center; justify-content: space-between;
-  padding: var(--p-row); border-radius: var(--r-sm);
+  padding: var(--p-row-compact); border-radius: var(--r-sm);
   background: var(--surface); cursor: pointer; transition: background .12s;
 }
 .playlist-item:active { background: var(--surface2); }
