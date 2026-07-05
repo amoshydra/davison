@@ -40,7 +40,8 @@ export function App() {
         <h1>Sonos Node</h1>
         <DeviceSelector
           devices={devices.devices}
-          selectedId={devices.selectedId}
+          selectedDevice={devices.selectedDevice}
+          isScanning={devices.isScanning}
           onDiscover={devices.discover}
           onSelect={devices.select}
         />

@@ -56,25 +56,101 @@ main {
 .device-selector {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.device-selector select {
+.selected-device {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.device-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #00d4ff;
+  box-shadow: 0 0 6px #00d4ff;
+  flex-shrink: 0;
+}
+
+.device-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.device-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.device-meta {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.scanning-device {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #0f3460;
+  border-top-color: #00d4ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.no-device {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.device-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.device-actions select {
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #0f3460;
   background: #1a1a2e;
   color: #e0e0e0;
-  min-width: 250px;
+  min-width: 200px;
 }
 
-.device-selector button {
+.device-actions select:disabled {
+  opacity: 0.5;
+}
+
+.device-actions button {
   padding: 8px 16px;
   border-radius: 8px;
   border: none;
   background: #0f3460;
   color: #e0e0e0;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.device-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Music Browser */

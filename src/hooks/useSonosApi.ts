@@ -15,11 +15,25 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 export function useDevices() {
   const [devices, setDevices] = useState<SonosDevice[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [isScanning, setIsScanning] = useState(false)
 
   const discover = useCallback(async () => {
-    const d = await fetchJson<SonosDevice[]>('/devices/discover', { method: 'POST' })
-    setDevices(d)
-    return d
+    setIsScanning(true)
+    try {
+      const d = await fetchJson<SonosDevice[]>('/devices/discover', { method: 'POST' })
+
+      setDevices(d)
+
+      setSelectedId(prev => {
+        if (prev && d.some(dev => dev.id === prev)) return prev
+        if (d.length === 1) return d[0].id
+        return null
+      })
+
+      return d
+    } finally {
+      setIsScanning(false)
+    }
   }, [])
 
   const select = useCallback(async (id: string) => {
@@ -27,7 +41,9 @@ export function useDevices() {
     setSelectedId(id)
   }, [])
 
-  return { devices, selectedId, discover, select }
+  const selectedDevice = devices.find(d => d.id === selectedId) || null
+
+  return { devices, selectedId, selectedDevice, isScanning, discover, select }
 }
 
 export function useMusic() {
