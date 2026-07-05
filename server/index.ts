@@ -19,8 +19,6 @@ program
   .option('-p, --path <paths...>', 'Path(s) to music directories')
   .option('--port <number>', 'Server port', '4534')
   .option('--host <address>', 'Server LAN address (auto-detected if omitted)')
-  .option('--webdav-user <username>', 'WebDAV username (optional)')
-  .option('--webdav-pass <password>', 'WebDAV password (optional)')
   .parse(process.argv)
 
 const options = program.opts()
@@ -28,8 +26,10 @@ const options = program.opts()
 config.port = parseInt(options.port, 10) || 4534
 if (options.host) config.host = options.host
 config.musicPaths = options.path || []
-if (options.webdavUser) config.webdavUser = options.webdavUser
-if (options.webdavPass) config.webdavPass = options.webdavPass
+
+// WebDAV credentials from environment (not CLI — avoids ps leak)
+config.webdavUser = process.env.DAVISON_WEBDAV_USER || ''
+config.webdavPass = process.env.DAVISON_WEBDAV_PASS || ''
 
 // Resolve relative paths against original cwd before main() may chdir
 const originalCwd = process.cwd()

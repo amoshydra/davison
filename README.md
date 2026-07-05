@@ -74,13 +74,22 @@ services:
 
 ### WebDAV
 
-The WebDAV server is available at `/webdav` (e.g., `http://192.168.0.x:4534/webdav/`). It mirrors your music folder structure. No authentication required.
+The WebDAV server is available at `/webdav` (e.g., `http://<your-server-ip>:4534/webdav/`). It mirrors your music folder structure.
+
+#### Authentication
+
+Disabled by default. To require Basic authentication, set the `DAVISON_WEBDAV_USER` and `DAVISON_WEBDAV_PASS` environment variables:
+
+```bash
+DAVISON_WEBDAV_USER=davison DAVISON_WEBDAV_PASS="your-password" npx davison --path /music
+```
+
+Environment variables are recommended over CLI flags because they do not appear in process listings (`ps aux`) or shell history. When authentication is enabled, the server logs `WebDAV auth enabled for user "<username>"` on startup.
 
 To use with Music Assistant:
 1. Add a **WebDAV** provider
 2. URL: `http://<your-server-ip>:4534/webdav/`
-3. Leave username/password blank
-4. Content type: `music`
+3. Username/Password: set them if you configured auth, leave blank otherwise
 
 ### Sonos
 
@@ -101,30 +110,30 @@ The dev server hot-reloads on file changes.
 
 ```
                    ┌──────────────────────┐
-                   │    Web Browser        │
-                   │  (React + Vite)       │
+                   │    Web Browser       │
+                   │  (React + Vite)      │
                    └──────────┬───────────┘
                               │ HTTP (port 4534)
                    ┌──────────▼───────────┐
-                   │   Express Server      │
-                   │  ┌─────────────────┐  │
-                   │  │ REST API (/api) │  │
-                   │  │ Queue Manager   │  │
-                   │  │ Sonos Controller│  │
-                   │  │ Playlist Store  │  │
-                   │  ├─────────────────┤  │
-                   │  │ WebDAV (/webdav)│  │
-                   │  │ (Nephele VFS)   │  │
-                   │  └─────────────────┘  │
+                   │   Express Server     │
+                   │  ┌─────────────────┐ │
+                   │  │ REST API (/api) │ │
+                   │  │ Queue Manager   │ │
+                   │  │ Sonos Controller│ │
+                   │  │ Playlist Store  │ │
+                   │  ├─────────────────┤ │
+                   │  │ WebDAV (/webdav)│ │
+                   │  │ (Nephele VFS)   │ │
+                   │  └─────────────────┘ │
                    └──────────┬───────────┘
                               │
           ┌───────────────────┼───────────────────┐
           │                   │                   │
-   ┌──────▼──────┐    ┌──────▼──────┐    ┌───────▼──────┐
-   │  Sonos       │    │ Music Files │    │ Music        │
-   │  Speakers    │    │  (on disk)  │    │ Assistant    │
-   │  (UPnP/HTTP) │    │             │    │ (via WebDAV) │
-   └─────────────┘    └─────────────┘    └──────────────┘
+   ┌──────▼──────┐     ┌──────▼──────┐    ┌───────▼──────┐
+   │ Sonos       │     │ Music Files │    │ Music        │
+   │ Speakers    │     │  (on disk)  │    │ Assistant    │
+   │ (UPnP/HTTP) │     │             │    │ (via WebDAV) │
+   └─────────────┘     └─────────────┘    └──────────────┘
 ```
 
 ## License

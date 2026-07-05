@@ -383,6 +383,10 @@ export function initWebdav(): ReturnType<typeof createServer> {
   const tree = buildDirs(tracks)
   const adapter = new VirtualAdapter(tree)
 
+  if (config.webdavUser) {
+    console.log(`WebDAV auth enabled for user "${config.webdavUser}"`)
+  }
+
   class WebdavAuth {
     async authenticate(request: any) {
       if (config.webdavUser) {
