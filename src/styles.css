@@ -364,6 +364,14 @@ body {
 .now-playing-info p {
   font-size: 0.95rem;
   color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.now-playing-info p {
+  font-size: 0.95rem;
+  color: var(--text2);
 }
 
 .now-playing-progress {
@@ -632,6 +640,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .queue-badge {
@@ -642,8 +651,21 @@ body {
   letter-spacing: .06em;
 }
 
-.queue-current h3 { font-size: 1rem; font-weight: 600; }
-.queue-current p { font-size: 0.85rem; color: var(--text2); }
+.queue-current h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-current p {
+  font-size: 0.85rem;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .queue-section-title {
   font-size: 0.75rem;
@@ -773,8 +795,8 @@ body {
 .playlist-item:hover { background: var(--surface2); }
 
 .playlist-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.playlist-name { font-size: 0.9rem; font-weight: 600; }
-.playlist-count { font-size: 0.75rem; color: var(--text2); }
+.playlist-name { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.playlist-count { font-size: 0.75rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .playlist-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
