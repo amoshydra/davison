@@ -89,63 +89,63 @@ export function App() {
           ))}
         </div>
 
-        {/* Content panels */}
-        <div className="view-panel">
-          {view === 'library' && (
-              <MusicBrowser
-                tracks={music.tracks}
-                onAddToQueue={playback.addToQueue}
-                onPlayNow={handlePlayNow}
-                onPlayFolderOrNow={handleFolderOrNow}
-                onPlayNext={playback.playNext}
-              />
-          )}
-
-          {view === 'now-playing' && (
-            <NowPlayingView
-              status={status.status}
-              volume={vol}
-              loopMode={status.status?.queue.loopMode || 'all'}
-              deviceName={devices.selectedDevice?.name}
-              onPlay={playback.play}
-              onPause={playback.pause}
-              onNext={playback.next}
-              onPrevious={playback.previous}
-              onSetVolume={playback.setVolume}
-              onSetLoop={playback.setLoop}
-            />
-          )}
-
-          {view === 'queue' && (
-            <QueueView
-              queue={status.status?.queue.queue || []}
-              currentIndex={status.status?.queue.currentIndex ?? null}
-              currentTrack={status.status?.queue.currentTrack || null}
-              onRemove={playback.removeFromQueue}
-              onClear={playback.clearQueue}
-              onJumpTo={playback.jumpTo}
-            />
-          )}
-
-          {view === 'playlists' && (
-            <PlaylistPanel
-              playlists={playlists.playlists}
-              onCreate={playlists.create}
-              onDelete={playlists.remove}
-              onPlay={playlists.play}
-            />
-          )}
-
-          {view === 'settings' && (
-            <DeviceSelector
-              devices={devices.devices}
-              selectedDevice={devices.selectedDevice}
-              isScanning={devices.isScanning}
-              onRefresh={() => devices.discover(true)}
-              onSelect={devices.select}
-            />
-          )}
+      {/* Content panels — all mounted, only active one is visible */}
+      <div className="view-panel">
+        <div className="view-stack" style={{ display: view === 'library' ? 'flex' : 'none' }}>
+          <MusicBrowser
+            tracks={music.tracks}
+            onAddToQueue={playback.addToQueue}
+            onPlayNow={handlePlayNow}
+            onPlayFolderOrNow={handleFolderOrNow}
+            onPlayNext={playback.playNext}
+          />
         </div>
+
+        <div className="view-stack" style={{ display: view === 'now-playing' ? 'flex' : 'none' }}>
+          <NowPlayingView
+            status={status.status}
+            volume={vol}
+            loopMode={status.status?.queue.loopMode || 'all'}
+            deviceName={devices.selectedDevice?.name}
+            onPlay={playback.play}
+            onPause={playback.pause}
+            onNext={playback.next}
+            onPrevious={playback.previous}
+            onSetVolume={playback.setVolume}
+            onSetLoop={playback.setLoop}
+          />
+        </div>
+
+        <div className="view-stack" style={{ display: view === 'queue' ? 'flex' : 'none' }}>
+          <QueueView
+            queue={status.status?.queue.queue || []}
+            currentIndex={status.status?.queue.currentIndex ?? null}
+            currentTrack={status.status?.queue.currentTrack || null}
+            onRemove={playback.removeFromQueue}
+            onClear={playback.clearQueue}
+            onJumpTo={playback.jumpTo}
+          />
+        </div>
+
+        <div className="view-stack" style={{ display: view === 'playlists' ? 'flex' : 'none' }}>
+          <PlaylistPanel
+            playlists={playlists.playlists}
+            onCreate={playlists.create}
+            onDelete={playlists.remove}
+            onPlay={playlists.play}
+          />
+        </div>
+
+        <div className="view-stack" style={{ display: view === 'settings' ? 'flex' : 'none' }}>
+          <DeviceSelector
+            devices={devices.devices}
+            selectedDevice={devices.selectedDevice}
+            isScanning={devices.isScanning}
+            onRefresh={() => devices.discover(true)}
+            onSelect={devices.select}
+          />
+        </div>
+      </div>
       </div>
 
       {/* Bottom player bar */}
