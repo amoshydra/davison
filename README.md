@@ -1,4 +1,4 @@
-# sonos-node
+# davison
 
 A standalone music server that streams your local music library to Sonos speakers and serves it via WebDAV for tools like Music Assistant.
 
@@ -21,7 +21,7 @@ A standalone music server that streams your local music library to Sonos speaker
 ### Via npx
 
 ```bash
-npx sonos-node --path /path/to/music
+npx davison --path /path/to/music
 ```
 
 Open http://localhost:3000 in your browser.
@@ -30,10 +30,10 @@ Open http://localhost:3000 in your browser.
 
 ```bash
 docker run -d \
-  --name sonos-node \
+  --name davison \
   --network host \
   -v /path/to/music:/music:ro \
-  ghcr.io/your-username/sonos-node \
+  ghcr.io/your-username/davison \
   --path /music
 ```
 
@@ -44,8 +44,8 @@ docker run -d \
 ```yaml
 version: "3.8"
 services:
-  sonos-node:
-    image: ghcr.io/your-username/sonos-node
+  davison:
+    image: ghcr.io/your-username/davison
     network_mode: host
     volumes:
       - /path/to/music:/music:ro
@@ -84,13 +84,13 @@ To use with Music Assistant:
 
 ### Sonos
 
-sonos-node discovers Sonos speakers on your LAN automatically via SSDP multicast. Select a speaker from the **Settings** tab and start playing.
+davison discovers Sonos speakers on your LAN automatically via SSDP multicast. Select a speaker from the **Settings** tab and start playing.
 
 ## Development
 
 ```bash
-git clone https://github.com/your-username/sonos-node.git
-cd sonos-node
+git clone https://github.com/your-username/davison.git
+cd davison
 pnpm install
 pnpm run dev -- --path /path/to/music
 ```

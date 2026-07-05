@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-// This is the entry point for `npx sonos-node` and global installs.
-// It uses tsx to run the TypeScript server directly.
+// Entry point for `npx @amoshydra/davison` and global installs.
+// Uses tsx to run the TypeScript server directly.
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
@@ -9,7 +9,6 @@ import { dirname, resolve } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const serverEntry = resolve(__dirname, '..', 'server', 'index.ts')
 
-// Use tsx if available, otherwise fall back to plain node (won't work for TS)
 const child = spawn(
   process.execPath,
   [

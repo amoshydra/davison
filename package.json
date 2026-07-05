@@ -1,10 +1,10 @@
 {
-  "name": "sonos-node",
+  "name": "@amoshydra/davison",
   "version": "0.2.0",
-  "description": "Standalone music server for Sonos speakers with WebDAV support",
+  "description": "WebDAV music server + Sonos controller. npx @amoshydra/davison --path /music",
   "type": "module",
   "bin": {
-    "sonos-node": "./bin/sonos-node.js"
+    "davison": "./bin/davison.js"
   },
   "scripts": {
     "dev": "tsx watch --ignore './vite.config.ts.timestamp-*' --ignore ./src --ignore ./node_modules server/index.ts",
