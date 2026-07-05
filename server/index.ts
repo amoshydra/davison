@@ -41,6 +41,12 @@ async function main() {
 
   app.use('/api', createApiRouter())
 
+  if (config.musicPaths.length > 0) {
+    const musicDir = config.musicPaths[0]
+    app.use('/music-files', express.static(musicDir))
+    console.log(`Serving static files from ${musicDir} at /music-files`)
+  }
+
   sonosController.discoverDevices().then(devices => {
     console.log(`Discovered ${devices.length} Sonos device(s)`)
     if (devices.length > 0) {

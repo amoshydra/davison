@@ -249,8 +249,20 @@ class SonosController extends EventEmitter {
     return (await this.getDevice()?.getVolume()) ?? 0
   }
 
-  async playUri(uri: string): Promise<void> {
-    await this.getDevice()?.play(uri)
+  async playUri(uri: string, title?: string): Promise<void> {
+    const device = this.getDevice()
+    if (!device) return
+
+    const trackTitle = title || uri.split('/').pop() || 'Music'
+    const escapedTitle = trackTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+    const metadata = `<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="0" parentID="A:TRACKS" restricted="true"><dc:title>${escapedTitle}</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">RINCON_AssociatedZPUDN</desc></item></DIDL-Lite>`
+
+    try {
+      await device.setAVTransportURI({ uri, metadata })
+    } catch (err) {
+      console.error('Failed to play URI:', err)
+    }
   }
 
   async queueUri(uri: string): Promise<void> {

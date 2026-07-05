@@ -17,29 +17,31 @@ export function useDevices() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
 
+  const select = useCallback(async (id: string) => {
+    await fetchJson('/devices/select', { method: 'POST', body: JSON.stringify({ id }) })
+    setSelectedId(id)
+  }, [])
+
   const discover = useCallback(async () => {
     setIsScanning(true)
     try {
       const d = await fetchJson<SonosDevice[]>('/devices/discover', { method: 'POST' })
-
       setDevices(d)
 
-      setSelectedId(prev => {
-        if (prev && d.some(dev => dev.id === prev)) return prev
-        if (d.length === 1) return d[0].id
-        return null
-      })
+      const stillExists = selectedId && d.some(dev => dev.id === selectedId)
+      if (stillExists) {
+        // preserved — no change needed
+      } else if (d.length === 1) {
+        await select(d[0].id)
+      } else {
+        setSelectedId(null)
+      }
 
       return d
     } finally {
       setIsScanning(false)
     }
-  }, [])
-
-  const select = useCallback(async (id: string) => {
-    await fetchJson('/devices/select', { method: 'POST', body: JSON.stringify({ id }) })
-    setSelectedId(id)
-  }, [])
+  }, [selectedId, select])
 
   const selectedDevice = devices.find(d => d.id === selectedId) || null
 

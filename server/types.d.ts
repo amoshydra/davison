@@ -33,7 +33,7 @@ declare module 'sonos' {
       modelNumber: string
     }>
     getAllGroups(): Promise<Array<{ Name: string; UUID: string; Coordinator: string }>>
-    play(uri: string): Promise<void>
+    setAVTransportURI(options: { uri: string; metadata?: string; onlySetUri?: boolean }): Promise<boolean>
     queue(uri: string, positionInQueue?: number): Promise<void>
     flush(): Promise<void>
     setPlayMode(mode: string): Promise<void>
