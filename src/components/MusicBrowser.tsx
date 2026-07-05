@@ -217,6 +217,7 @@ function DirSection({
         className="dir-header"
         style={{ '--depth': depth } as React.CSSProperties}
         onClick={() => setCollapsed(!collapsed)}
+        onContextMenu={e => e.preventDefault()}
       >
         <span
           className={`track-check${allSelected ? ' checked' : ''}${someSelected && !allSelected ? ' indeterminate' : ''}`}
