@@ -299,21 +299,6 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayNext }: Pr
         )}
       </div>
 
-      {selectMode && selected.size > 0 && (
-        <div className="select-actions visible">
-          <button onClick={() => { onPlayNow(Array.from(selected)[0]); exitSelectMode() }}>
-            Play
-          </button>
-          {onPlayNext && (
-            <button onClick={() => { onPlayNext(Array.from(selected)); exitSelectMode() }}>
-              Play Next
-            </button>
-          )}
-          <button onClick={() => { onAddToQueue(Array.from(selected)); exitSelectMode() }}>
-            Add{selected.size > 1 ? ` ${selected.size}` : ''}
-          </button>
-        </div>
-      )}
       <div className={`track-list${selectMode ? ' select-mode' : ''}`}>
         {filtered.map(root => (
           <DirSection
