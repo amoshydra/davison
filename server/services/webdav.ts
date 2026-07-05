@@ -75,9 +75,9 @@ function findNode(pathParts: string[], nodes: DirNode[]): { node: DirNode | null
       if (n.dirs.length === 0 && n.tracks.length === 1) {
         return { node: null, trackIndex: null, realPath: n.tracks[0].filePath }
       }
-      // Multi-track node (several loose files at this level)
+      // Multi-track leaf node (e.g. <root> group, several loose files)
       if (rest.length === 0 && n.tracks.length > 0) {
-        return { node: null, trackIndex: null, realPath: null }
+        return { node: n, trackIndex: null, realPath: null }
       }
       if (rest.length === 0) return { node: n, trackIndex: null, realPath: null }
       if (n.dirs.length > 0) return findNode(rest, n.dirs)
