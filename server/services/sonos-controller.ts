@@ -1,5 +1,8 @@
-import { DeviceDiscovery, Sonos } from 'sonos'
+import { Sonos } from 'sonos'
 import { EventEmitter } from 'node:events'
+import dgram from 'node:dgram'
+import os from 'node:os'
+import net from 'node:net'
 
 export interface SonosDevice {
   id: string
@@ -23,30 +26,133 @@ export interface SonosStatus {
   muted: boolean
 }
 
+function findLanAddress(): string {
+  const ifaces = os.networkInterfaces()
+  for (const [name, addrs] of Object.entries(ifaces)) {
+    if (!addrs) continue
+    if (name.startsWith('wg') || name.startsWith('tun') || name.startsWith('docker') || name.startsWith('br-')) continue
+    for (const addr of addrs) {
+      if (addr.family === 'IPv4' && !addr.internal) {
+        return addr.address
+      }
+    }
+  }
+  return '0.0.0.0'
+}
+
+function getSubnets(): string[] {
+  const subnets: string[] = []
+  const ifaces = os.networkInterfaces()
+  for (const [name, addrs] of Object.entries(ifaces)) {
+    if (!addrs) continue
+    if (name.startsWith('wg') || name.startsWith('tun') || name.startsWith('docker') || name.startsWith('br-') || name === 'lo') continue
+    for (const addr of addrs) {
+      if (addr.family === 'IPv4' && !addr.internal && addr.cidr) {
+        subnets.push(addr.cidr)
+      }
+    }
+  }
+  return subnets
+}
+
 class SonosController extends EventEmitter {
   private devices: Map<string, Sonos> = new Map()
   private deviceInfo: Map<string, SonosDevice> = new Map()
   private selectedDevice: string | null = null
   private listening = false
 
-  async discoverDevices(): Promise<SonosDevice[]> {
+  async discoverDevices(timeout = 5000): Promise<SonosDevice[]> {
     this.devices.clear()
     this.deviceInfo.clear()
 
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => resolve(this.getDevices()), 5000)
-      const discovery = DeviceDiscovery((device: Sonos) => {
-        void this.registerDevice(device)
-        clearTimeout(timeout)
+    const lanAddr = findLanAddress()
+    const foundIps = new Set<string>()
+
+    // SSDP multicast discovery
+    await new Promise<void>((resolve) => {
+      const socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+
+      socket.on('message', (msg, rinfo) => {
+        if (msg.toString().includes('Sonos')) {
+          foundIps.add(rinfo.address)
+        }
       })
-      discovery.on('DeviceAvailable', (device: Sonos) => {
-        void this.registerDevice(device)
-      })
+
+      socket.on('error', () => { /* ignore */ })
+
+      try {
+        socket.bind(0, lanAddr, () => {
+          socket.setMulticastTTL(4)
+          socket.setMulticastInterface(lanAddr)
+          socket.setBroadcast(true)
+          try { socket.addMembership('239.255.255.250', lanAddr) } catch { /* ignore */ }
+
+          const search = Buffer.from(
+            'M-SEARCH * HTTP/1.1\r\n' +
+            'HOST: 239.255.255.250:1900\r\n' +
+            'MAN: "ssdp:discover"\r\n' +
+            'MX: 3\r\n' +
+            'ST: urn:schemas-upnp-org:device:ZonePlayer:1\r\n' +
+            '\r\n'
+          )
+
+          socket.send(search, 0, search.length, 1900, '239.255.255.250')
+          socket.send(search, 0, search.length, 1900, '255.255.255.255')
+        })
+      } catch { /* socket bind failed, skip SSDP */ }
+
       setTimeout(() => {
-        discovery.destroy()
-        resolve(this.getDevices())
-      }, 6000)
+        try { socket.close() } catch { /* ignore */ }
+        resolve()
+      }, timeout)
     })
+
+    // Fallback: TCP port scan on 1400 for local subnets
+    if (foundIps.size === 0) {
+      const subnets = getSubnets()
+      const scanPromises: Promise<void>[] = []
+
+      for (const cidr of subnets) {
+        const [base, prefixStr] = cidr.split('/')
+        const prefix = parseInt(prefixStr, 10)
+        if (prefix >= 24) {
+          const parts = base.split('.')
+          const networkPrefix = parts.slice(0, 3).join('.')
+          for (let i = 1; i <= 254; i++) {
+            const ip = `${networkPrefix}.${i}`
+            scanPromises.push(
+              new Promise((resolveScan) => {
+                const s = new net.Socket()
+                s.setTimeout(500)
+                s.on('connect', () => {
+                  foundIps.add(ip)
+                  s.destroy()
+                  resolveScan()
+                })
+                s.on('error', () => s.destroy())
+                s.on('timeout', () => s.destroy())
+                s.connect(1400, ip, () => {})
+                setTimeout(() => resolveScan(), 600)
+              })
+            )
+          }
+        }
+      }
+
+      await Promise.all(scanPromises)
+    }
+
+    // Register all found devices
+    for (const ip of foundIps) {
+      try {
+        const device = new Sonos(ip)
+        await this.registerDevice(device)
+      } catch {
+        // skip unresponsive
+      }
+    }
+
+    return this.getDevices()
   }
 
   private async registerDevice(device: Sonos): Promise<void> {
