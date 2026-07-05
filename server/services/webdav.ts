@@ -164,10 +164,14 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
 
     async getMediaType() { return this.getContentType() },
 
-    async getStream() {
+    async getStream(range?: { start: number; end: number }) {
       if (!realPath) {
         const { Readable } = await import('node:stream')
         return Readable.from([])
+      }
+      if (range) {
+        const { createReadStream } = await import('node:fs')
+        return createReadStream(realPath, { start: range.start, end: range.end })
       }
       return createReadStream(realPath)
     },
