@@ -95,7 +95,9 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       {sonos && (
         <div className="np-progress">
           <div className="np-progress-track">
-            <div className="np-progress-fill" style={{ width: `${progress}%` }} />
+            <div className="np-track-bg" />
+            <div className="np-track-fill" style={{ width: `${progress}%` }} />
+            <div className="np-thumb" style={{ left: `${progress}%` }} />
             <input
               type="range"
               min={0}

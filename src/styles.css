@@ -318,55 +318,74 @@ body {
 .np-progress-track {
   position: relative; height: 44px;
   display: flex; align-items: center;
+  min-width: 0;
 }
 
-.np-progress-track::before {
-  content: '';
+/* Gray background track */
+.np-track-bg {
   position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
   height: 3px; background: var(--surface3);
   border-radius: 2px;
   pointer-events: none;
 }
 
-.np-progress-fill {
+/* Accent fill */
+.np-track-fill {
   position: absolute; left: 0; top: 50%; transform: translateY(-50%);
   height: 3px; background: var(--accent);
   border-radius: 2px;
   pointer-events: none;
   max-width: 100%;
-  z-index: 1;
 }
 
+/* Visual thumb */
+.np-thumb {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(0,0,0,.4);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform .12s;
+}
+
+.np-seek:active + .np-thumb,
+.np-seek:focus-visible + .np-thumb {
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+/* Native input — invisible, captures all interaction */
 .np-seek {
   -webkit-appearance: none; appearance: none;
-  width: 100%; height: 44px;
+  width: 100%; height: 100%;
   background: transparent;
   cursor: pointer;
   outline: none;
-  position: relative;
+  position: absolute;
+  top: 0; left: 0;
   z-index: 2;
   margin: 0;
-}
-
-.np-seek::-webkit-slider-runnable-track {
-  height: 3px;
-  background: transparent;
-  border: none;
+  opacity: 0;
 }
 
 .np-seek::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-top: -9.5px;
+  width: 44px; height: 44px;
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(0,0,0,.4);
-  transition: transform .12s;
 }
 
-.np-seek:active::-webkit-slider-thumb {
-  transform: scale(1.25);
+.np-seek::-moz-range-thumb {
+  width: 44px; height: 44px;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.np-seek::-moz-range-track {
+  background: transparent;
+  border: none;
+  height: 44px;
 }
 
 .np-times {
