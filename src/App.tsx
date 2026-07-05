@@ -18,6 +18,18 @@ const tabs: { id: View; label: string; icon: typeof Music }[] = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
+function hashToGradient(str: string): string {
+  let hash = 5381
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i)
+  }
+  hash = Math.abs(hash)
+  const hue = hash % 360
+  const sat = 55 + (hash % 25)
+  const lig = 40 + (hash % 12)
+  return `linear-gradient(135deg, hsl(${hue}, ${sat}%, ${lig}%), hsl(${(hue + 60) % 360}, ${sat - 10}%, ${lig - 5}%))`
+}
+
 export function App() {
   const [view, setView] = useState<View>('library')
   const devices = useDevices()
@@ -50,11 +62,18 @@ export function App() {
   }
 
   const vol = status.status?.sonos?.volume ?? 50
-  const coverTrackId = status.status?.sonos?.track.trackId || status.status?.queue.currentTrack?.id || null
+  const sonos = status.status?.sonos
+  const coverTrackId = sonos?.track.trackId || status.status?.queue.currentTrack?.id || null
   const coverUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
+  const fallbackKey = sonos ? `${sonos.track.title}|${sonos.track.artist}|${sonos.track.album}` : ''
+  const coverBg = coverUrl
+    ? `url(${coverUrl})`
+    : fallbackKey
+      ? hashToGradient(fallbackKey)
+      : 'none'
 
   return (
-    <div className="app" style={{ '--cover-bg': coverUrl ? `url(${coverUrl})` : 'none' } as React.CSSProperties}>
+    <div className="app" style={{ '--cover-bg': coverBg } as React.CSSProperties}>
       {/* Desktop sidebar */}
       <nav className="sidebar">
         <div className="sidebar-logo">S</div>
