@@ -275,17 +275,14 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNo
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <div className="browser-actions">
-          <span>{tracks.length} tracks</span>
-          {selectMode && selected.size > 0 && (
+        {selectMode && (
+          <div className="browser-actions">
             <span className="select-count">{selected.size} selected</span>
-          )}
-          {selectMode && (
             <button className="browser-done" onClick={exitSelectMode}>
-              Done
+              Clear
             </button>
-          )}
-        </div>
+          </div>
+        )}
         {selectMode && selected.size > 0 && (
           <div className="select-actions-inline">
             <button onClick={() => { onPlayNow(Array.from(selected)[0]); exitSelectMode() }}>

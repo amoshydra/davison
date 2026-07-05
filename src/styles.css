@@ -386,9 +386,7 @@ body {
 
 /* Inline select action buttons (below search) */
 .select-actions-inline {
-  display: flex; gap: var(--sp-6); padding-top: var(--sp-4);
-  border-top: 1px solid var(--surface3);
-  margin-top: var(--sp-4);
+  display: flex; gap: var(--sp-6);
 }
 
 .select-actions-inline button {
