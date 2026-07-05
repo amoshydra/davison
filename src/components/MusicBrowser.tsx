@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
+import { Check } from 'lucide-react'
 import type { MusicTrack } from '../types'
 
 interface Props {
@@ -19,8 +20,6 @@ function buildDirs(tracks: MusicTrack[]): DirNode[] {
   for (const track of tracks) {
     const parts = track.relativePath.split('/')
     const fileName = parts.pop()!
-
-    // Prepend baseName as the first path component if not empty
     const path = track.baseName ? [track.baseName, ...parts] : parts
     let level = roots
 
@@ -46,127 +45,10 @@ function flattenIds(dir: DirNode): string[] {
   return ids
 }
 
-function pickTracks(dir: DirNode): MusicTrack[] {
-  const list: MusicTrack[] = []
-  for (const t of dir.tracks) list.push(t)
-  for (const sub of dir.dirs) list.push(...pickTracks(sub))
-  return list
-}
-
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
   return `${m}:${s.toString().padStart(2, '0')}`
-}
-
-function DirSection({
-  dir,
-  depth,
-  search,
-  selected,
-  onToggle,
-  onAddToQueue,
-}: {
-  dir: DirNode
-  depth: number
-  search: string
-  selected: Set<string>
-  onToggle: (id: string) => void
-  onAddToQueue: (ids: string[]) => void
-}) {
-  const [collapsed, setCollapsed] = useState(depth > 0)
-
-  const isLeaf = dir.dirs.length === 0 && dir.tracks.length <= 1
-  const track = isLeaf ? dir.tracks[0] : null
-
-  const allIds = useMemo(() => flattenIds(dir), [dir])
-
-  const hasContent = useMemo(() => {
-    if (!search) return true
-    return pickTracks(dir).some(t =>
-      t.title.toLowerCase().includes(search) ||
-      t.artist.toLowerCase().includes(search) ||
-      t.album.toLowerCase().includes(search) ||
-      t.fileName.toLowerCase().includes(search),
-    )
-  }, [dir, search])
-
-  if (!hasContent) return null
-
-  if (isLeaf && track) {
-    return (
-      <div
-        className={`track-item ${selected.has(track.id) ? 'selected' : ''}`}
-        style={{ paddingLeft: `${16 + depth * 20}px` }}
-        onClick={() => onToggle(track.id)}
-        onDoubleClick={() => onAddToQueue([track.id])}
-      >
-        <div className="track-info">
-          <span className="track-title">{track.title}</span>
-          <span className="track-artist">{track.artist}</span>
-        </div>
-        <span className="track-duration">{formatDuration(track.duration)}</span>
-      </div>
-    )
-  }
-
-  const isEmpty = allIds.length === 0
-  if (isEmpty) return null
-
-  return (
-    <div className="dir-section">
-      <div
-        className="dir-header"
-        style={{ paddingLeft: `${8 + depth * 20}px` }}
-        onClick={() => setCollapsed(!collapsed)}
-      >
-        <span className="dir-arrow">{collapsed ? '▶' : '▼'}</span>
-        <span className="dir-name">{dir.name}</span>
-        <span className="dir-count">{allIds.length}</span>
-        <span className="dir-actions" onClick={e => e.stopPropagation()}>
-          <button
-            className="dir-btn"
-            onClick={() => onAddToQueue(allIds)}
-          >
-            Add
-          </button>
-        </span>
-      </div>
-      {!collapsed && (
-        <div className="dir-children">
-          {dir.dirs.map(sub => (
-            <DirSection
-              key={`${dir.name}/${sub.name}`}
-              dir={sub}
-              depth={depth + 1}
-              search={search}
-              selected={selected}
-              onToggle={onToggle}
-              onAddToQueue={onAddToQueue}
-            />
-          ))}
-          {dir.tracks.map(t => {
-            if (search && !matches(t, search)) return null
-            return (
-              <div
-                key={t.id}
-                className={`track-item ${selected.has(t.id) ? 'selected' : ''}`}
-                style={{ paddingLeft: `${16 + (depth + 1) * 20}px` }}
-                onClick={() => onToggle(t.id)}
-                onDoubleClick={() => onAddToQueue([t.id])}
-              >
-                <div className="track-info">
-                  <span className="track-title">{t.title}</span>
-                  <span className="track-artist">{t.artist}</span>
-                </div>
-                <span className="track-duration">{formatDuration(t.duration)}</span>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
 }
 
 function matches(t: MusicTrack, q: string): boolean {
@@ -179,9 +61,146 @@ function matches(t: MusicTrack, q: string): boolean {
   )
 }
 
+function TrackRow({
+  track,
+  depth,
+  selected,
+  selectMode,
+  onPlay,
+  onToggle,
+}: {
+  track: MusicTrack
+  depth: number
+  selected: boolean
+  selectMode: boolean
+  onPlay: () => void
+  onToggle: () => void
+}) {
+  return (
+    <div
+      className={`track-item${selected ? ' selected' : ''}`}
+      style={{ paddingLeft: `${16 + depth * 20}px` }}
+      onClick={onPlay}
+    >
+      <span
+        className={`track-check${selected ? ' checked' : ''}`}
+        onClick={e => { e.stopPropagation(); onToggle() }}
+      >
+        {selected && <Check size={14} />}
+      </span>
+      <div className="track-info">
+        <span className="track-title">{track.title}</span>
+        <span className="track-artist">{track.artist}</span>
+      </div>
+      <span className="track-duration">{formatDuration(track.duration)}</span>
+    </div>
+  )
+}
+
+function DirSection({
+  dir,
+  depth,
+  search,
+  selected,
+  selectMode,
+  onPlay,
+  onToggle,
+  onAddToQueue,
+}: {
+  dir: DirNode
+  depth: number
+  search: string
+  selected: Set<string>
+  selectMode: boolean
+  onPlay: (id: string) => void
+  onToggle: (id: string) => void
+  onAddToQueue: (ids: string[]) => void
+}) {
+  const [collapsed, setCollapsed] = useState(depth > 0)
+
+  const isLeaf = dir.dirs.length === 0 && dir.tracks.length <= 1
+  const track = isLeaf ? dir.tracks[0] : null
+
+  const allIds = useMemo(() => flattenIds(dir), [dir])
+  const hasContent = useMemo(() => {
+    if (!search) return true
+    return dir.tracks.some(t => matches(t, search)) || dir.dirs.some(sub => {
+      const s = search
+      return sub.tracks.some(t => matches(t, s))
+    })
+  }, [dir, search])
+
+  if (!hasContent) return null
+
+  if (isLeaf && track) {
+    return (
+      <TrackRow
+        track={track}
+        depth={depth}
+        selected={selected.has(track.id)}
+        selectMode={selectMode}
+        onPlay={() => onPlay(track.id)}
+        onToggle={() => onToggle(track.id)}
+      />
+    )
+  }
+
+  if (allIds.length === 0) return null
+
+  return (
+    <div className="dir-section">
+      <div
+        className="dir-header"
+        style={{ paddingLeft: `${8 + depth * 20}px` }}
+        onClick={() => setCollapsed(!collapsed)}
+      >
+        <span className="dir-arrow">{collapsed ? '▶' : '▼'}</span>
+        <span className="dir-name">{dir.name}</span>
+        <span className="dir-count">{allIds.length}</span>
+        <span className="dir-actions" onClick={e => e.stopPropagation()}>
+          <button className="dir-btn" onClick={() => onAddToQueue(allIds)}>Add</button>
+        </span>
+      </div>
+      {!collapsed && (
+        <div className="dir-children">
+          {dir.dirs.map(sub => (
+            <DirSection
+              key={`${dir.name}/${sub.name}`}
+              dir={sub}
+              depth={depth + 1}
+              search={search}
+              selected={selected}
+              selectMode={selectMode}
+              onPlay={onPlay}
+              onToggle={onToggle}
+              onAddToQueue={onAddToQueue}
+            />
+          ))}
+          {dir.tracks.map(t => {
+            if (search && !matches(t, search)) return null
+            return (
+              <TrackRow
+                key={t.id}
+                track={t}
+                depth={depth + 1}
+                selected={selected.has(t.id)}
+                selectMode={selectMode}
+                onPlay={() => onPlay(t.id)}
+                onToggle={() => onToggle(t.id)}
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [selectMode, setSelectMode] = useState(false)
+  const pressTimer = useRef<ReturnType<typeof setTimeout>>()
 
   const roots = useMemo(() => buildDirs(tracks), [tracks])
   const q = search.toLowerCase()
@@ -204,9 +223,42 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
     setSelected(next)
   }
 
+  function handlePlay(id: string) {
+    if (selectMode) {
+      toggle(id)
+    } else {
+      onPlayNow(id)
+    }
+  }
+
+  function handleToggle(id: string) {
+    toggle(id)
+    if (!selectMode) {
+      setSelectMode(true)
+    }
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelected(new Set())
+  }
+
+  function handleTouchStart(_e: React.TouchEvent, id: string) {
+    pressTimer.current = setTimeout(() => {
+      setSelectMode(true)
+      toggle(id)
+    }, 400)
+  }
+
+  function handleTouchEnd() {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current)
+      pressTimer.current = undefined
+    }
+  }
+
   return (
     <div className="music-browser">
-      <h3>Music Library</h3>
       <input
         type="text"
         placeholder="Search tracks, artists, albums..."
@@ -215,13 +267,15 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
       />
       <div className="browser-actions">
         <span>{tracks.length} tracks</span>
-        {selected.size > 0 && (
-          <>
-            <button onClick={() => { onAddToQueue(Array.from(selected)); setSelected(new Set()) }}>
-              Add {selected.size} to Queue
-            </button>
-            <button onClick={() => setSelected(new Set())}>Clear</button>
-          </>
+        {selectMode && selected.size > 0 && (
+          <button onClick={() => { onAddToQueue(Array.from(selected)) }}>
+            Add {selected.size} to Queue
+          </button>
+        )}
+        {selectMode && (
+          <button className="browser-done" onClick={exitSelectMode}>
+            Done
+          </button>
         )}
       </div>
       <div className="track-list">
@@ -232,7 +286,9 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
             depth={0}
             search={q}
             selected={selected}
-            onToggle={toggle}
+            selectMode={selectMode}
+            onPlay={handlePlay}
+            onToggle={handleToggle}
             onAddToQueue={onAddToQueue}
           />
         ))}

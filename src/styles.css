@@ -82,7 +82,10 @@ body {
   transition: all 0.15s;
 }
 
-.sidebar-btn:hover { color: var(--text); background: var(--surface2); }
+.sidebar-btn:active { background: var(--surface2); }
+@media (hover: hover) {
+  .sidebar-btn:hover { color: var(--text); background: var(--surface2); }
+}
 .sidebar-btn.active { color: var(--accent); background: var(--surface2); }
 
 @media (min-width: 768px) {
@@ -258,7 +261,10 @@ body {
   transition: background 0.15s;
 }
 
-.player-bar-controls button:hover { background: var(--surface2); }
+.player-bar-controls button:active { background: var(--surface2); }
+@media (hover: hover) {
+  .player-bar-controls button:hover { background: var(--surface2); }
+}
 .player-bar-controls button svg { display: block; }
 
 .player-bar-volume {
@@ -305,7 +311,10 @@ body {
   padding: 4px 0;
 }
 
-.now-playing-back:hover { color: var(--text); }
+.now-playing-back:active { color: var(--text); }
+@media (hover: hover) {
+  .now-playing-back:hover { color: var(--text); }
+}
 
 .now-playing-hero {
   position: relative;
@@ -435,7 +444,10 @@ body {
   transition: all 0.15s;
 }
 
-.now-playing-controls button:hover { color: var(--accent); }
+.now-playing-controls button:active { color: var(--accent); }
+@media (hover: hover) {
+  .now-playing-controls button:hover { color: var(--accent); }
+}
 
 .now-playing-controls .btn-play {
   width: 56px;
@@ -444,7 +456,10 @@ body {
   color: var(--bg);
 }
 
-.now-playing-controls .btn-play:hover { background: var(--accent2); color: var(--bg); }
+.now-playing-controls .btn-play:active { background: var(--accent2); color: var(--bg); }
+@media (hover: hover) {
+  .now-playing-controls .btn-play:hover { background: var(--accent2); color: var(--bg); }
+}
 .now-playing-controls .btn-play svg { margin-left: 2px; }
 
 .now-playing-controls .btn-sm { width: 40px; height: 40px; }
@@ -563,7 +578,11 @@ body {
   user-select: none;
 }
 
-.dir-header:hover { background: var(--surface); }
+.dir-header:active { background: var(--surface); }
+
+@media (hover: hover) {
+  .dir-header:hover { background: var(--surface); }
+}
 
 .dir-arrow { font-size: 0.6rem; color: var(--text3); width: 16px; flex-shrink: 0; }
 .dir-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -588,21 +607,56 @@ body {
   transition: background 0.12s;
 }
 
-.dir-btn:hover { background: var(--surface3); }
+.dir-btn:active { background: var(--surface3); }
+@media (hover: hover) {
+  .dir-btn:hover { background: var(--surface3); }
+}
 
 .dir-children { padding-left: 0; }
+
+/* ─── Checkbox ─── */
+.track-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1.5px solid var(--surface3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s;
+  cursor: pointer;
+  color: transparent;
+}
+
+@media (hover: hover) {
+  .track-check { opacity: 0; }
+  .track-item:hover .track-check { opacity: 1; }
+}
+
+.track-check.checked {
+  opacity: 1 !important;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
 
 .track-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 6px 12px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.12s;
 }
 
-.track-item:hover { background: var(--surface); }
+.track-item:active { background: var(--surface2); }
+
+@media (hover: hover) {
+  .track-item:hover { background: var(--surface); }
+}
+
 .track-item.selected { background: var(--surface2); }
 
 .track-info {
@@ -633,6 +687,12 @@ body {
   font-size: 0.75rem;
   color: var(--text3);
   flex-shrink: 0;
+}
+
+.browser-done {
+  background: transparent !important;
+  color: var(--accent) !important;
+  font-weight: 600;
 }
 
 /* ─── Queue View ─── */
@@ -694,7 +754,10 @@ body {
   transition: background 0.12s;
 }
 
-.queue-item:hover { background: var(--surface); }
+.queue-item:active { background: var(--surface); }
+@media (hover: hover) {
+  .queue-item:hover { background: var(--surface); }
+}
 .queue-item.playing { background: var(--surface2); }
 
 .queue-pos {
@@ -731,7 +794,10 @@ body {
   transition: color 0.12s;
 }
 
-.queue-remove:hover { color: var(--text); }
+.queue-remove:active { color: var(--text); }
+@media (hover: hover) {
+  .queue-remove:hover { color: var(--text); }
+}
 
 .queue-empty {
   flex: 1;
@@ -799,7 +865,10 @@ body {
   transition: background 0.12s;
 }
 
-.playlist-item:hover { background: var(--surface2); }
+.playlist-item:active { background: var(--surface2); }
+@media (hover: hover) {
+  .playlist-item:hover { background: var(--surface2); }
+}
 
 .playlist-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .playlist-name { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -818,9 +887,15 @@ body {
   transition: background 0.12s;
 }
 
-.playlist-actions button:hover { background: var(--surface3); }
+.playlist-actions button:active { background: var(--surface3); }
+@media (hover: hover) {
+  .playlist-actions button:hover { background: var(--surface3); }
+}
 .playlist-actions .btn-play-list { background: var(--accent); color: var(--bg); }
-.playlist-actions .btn-play-list:hover { background: var(--accent2); }
+.playlist-actions .btn-play-list:active { background: var(--accent2); }
+@media (hover: hover) {
+  .playlist-actions .btn-play-list:hover { background: var(--accent2); }
+}
 
 .playlist-empty {
   display: flex;
@@ -879,7 +954,10 @@ body {
   transition: background 0.12s;
 }
 
-.settings-row button:hover { background: var(--surface3); }
+.settings-row button:active { background: var(--surface3); }
+@media (hover: hover) {
+  .settings-row button:hover { background: var(--surface3); }
+}
 .settings-row button:disabled { opacity: .4; cursor: default; }
 
 .settings-status {
