@@ -490,7 +490,6 @@ body {
   display: flex; align-items: center; gap: var(--sp-6);
   padding: var(--sp-8) var(--sp-12);
   padding-left: calc(var(--hd-px) + var(--depth, 0) * var(--indent));
-  border-radius: var(--r-sm);
   cursor: pointer; transition: background .12s;
   font-size: .9rem; font-weight: 600; color: var(--text2); user-select: none;
   position: sticky; top: 0; z-index: 2;
