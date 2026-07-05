@@ -9,47 +9,55 @@ interface Props {
 }
 
 export function DeviceSelector({ devices, selectedDevice, isScanning, onRefresh, onSelect }: Props) {
-
   return (
-    <div className="device-selector">
-      {isScanning ? (
-        <div className="scanning-device">
-          <span className="spinner" />
-          <span>Scanning for Sonos devices...</span>
-        </div>
-      ) : selectedDevice ? (
-        <div className="selected-device">
-          <span className="device-indicator" />
-          <div className="device-info">
-            <span className="device-name">{selectedDevice.name}</span>
-            <span className="device-meta">{selectedDevice.model} &middot; {selectedDevice.ip}</span>
-          </div>
-        </div>
-      ) : devices.length > 0 ? (
-        <div className="no-device">
-          <span>Select a Sonos device below</span>
-        </div>
-      ) : (
-        <div className="no-device">
-          <span>No Sonos devices found</span>
-        </div>
-      )}
-      <div className="device-actions">
+    <div className="settings-view">
+      <div className="view-panel-header" style={{ padding: 0 }}>
+        <h2>Settings</h2>
+      </div>
+
+      <div className="settings-row">
+        <label>Sonos device</label>
         <select
           value={selectedDevice?.id || ''}
           onChange={e => e.target.value && onSelect(e.target.value)}
           disabled={isScanning || devices.length === 0}
         >
-          {!selectedDevice && <option value="">{devices.length > 0 ? 'Choose a device...' : 'No devices'}</option>}
+          {!selectedDevice && <option value="">Select device...</option>}
           {devices.map(d => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
+            <option key={d.id} value={d.id}>{d.name}</option>
           ))}
         </select>
+      </div>
+
+      <div className="settings-row">
+        <label />
         <button onClick={onRefresh} disabled={isScanning}>
           {isScanning ? 'Scanning...' : 'Refresh'}
         </button>
+      </div>
+
+      <div className="settings-status">
+        {selectedDevice ? (
+          <>
+            <span className="settings-dot online" />
+            <span>{selectedDevice.name} ({selectedDevice.ip})</span>
+          </>
+        ) : devices.length > 0 ? (
+          <>
+            <span className="settings-dot offline" />
+            <span>Select a device above</span>
+          </>
+        ) : isScanning ? (
+          <>
+            <span className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} />
+            <span>Scanning for devices...</span>
+          </>
+        ) : (
+          <>
+            <span className="settings-dot offline" />
+            <span>No devices found</span>
+          </>
+        )}
       </div>
     </div>
   )

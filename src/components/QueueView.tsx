@@ -1,59 +1,81 @@
+import { X } from 'lucide-react'
 import type { MusicTrack } from '../types'
 
 interface Props {
   queue: MusicTrack[]
   currentIndex: number | null
+  currentTrack: MusicTrack | null
   onRemove: (index: number) => void
   onClear: () => void
   onJumpTo: (trackId: string) => void
 }
 
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
-export function QueueView({ queue, currentIndex, onRemove, onClear, onJumpTo }: Props) {
-  if (queue.length === 0) {
+export function QueueView({ queue, currentIndex, currentTrack, onRemove, onClear, onJumpTo }: Props) {
+  if (queue.length === 0 && !currentTrack) {
     return (
       <div className="queue-view">
-        <h3>Queue</h3>
-        <p className="empty-queue">Queue is empty</p>
+        <div className="queue-empty">
+          <p>Queue is empty</p>
+          <p style={{ fontSize: '0.8rem' }}>Browse music and add tracks</p>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="queue-view">
-      <div className="queue-header">
-        <h3>Queue ({queue.length})</h3>
-        <button onClick={onClear}>Clear</button>
-      </div>
-      <div className="queue-list">
-        {queue.map((track, i) => (
-          <div
-            key={`${track.id}-${i}`}
-            className={`queue-item ${i === currentIndex ? 'playing' : ''}`}
-            onClick={() => onJumpTo(track.id)}
+      <div className="view-panel-header">
+        <h2>Queue</h2>
+        {queue.length > 0 && (
+          <button
+            className="dir-btn"
+            onClick={onClear}
+            style={{ color: 'var(--text2)' }}
           >
-            <span className="queue-index">{i + 1}</span>
-            <div className="queue-info">
-              <span className="queue-title">{track.title}</span>
-              <span className="queue-artist">{track.artist}</span>
-            </div>
-            <span className="queue-duration">{formatDuration(track.duration)}</span>
-            {i !== currentIndex && (
-              <button
-                className="remove-btn"
-                onClick={e => { e.stopPropagation(); onRemove(i) }}
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        ))}
+            Clear
+          </button>
+        )}
       </div>
+
+      {currentTrack && (
+        <>
+          <div className="queue-current">
+            <span className="queue-badge">Now Playing</span>
+            <h3>{currentTrack.title}</h3>
+            <p>{currentTrack.artist}</p>
+          </div>
+        </>
+      )}
+
+      {queue.length > 0 && (
+        <>
+          {currentTrack && <div className="queue-section-title">Up Next ({queue.length})</div>}
+          <div className="queue-list">
+            {queue.map((track, i) => (
+              <div
+                key={`${track.id}-${i}`}
+                className={`queue-item${i === currentIndex ? ' playing' : ''}`}
+                onClick={() => onJumpTo(track.id)}
+              >
+                <span className="queue-pos">{i + 1}</span>
+                <div className="queue-info">
+                  <span>{track.title}</span>
+                  <span>{track.artist}</span>
+                </div>
+                {i !== currentIndex && (
+                  <button
+                    className="queue-remove"
+                    onClick={e => { e.stopPropagation(); onRemove(i) }}
+                    aria-label="Remove"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
