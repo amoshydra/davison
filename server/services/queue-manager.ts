@@ -299,6 +299,11 @@ class QueueManager extends EventEmitter {
       if (!sonosController.hasDevice()) return
       const track = this.getCurrentTrack()
       if (!track) return
+
+      // Don't resume if Sonos is already playing something
+      const status = await sonosController.getStatus()
+      if (status && status.state !== 'STOPPED') return
+
       await this.playTrack(this.state.currentIndex!)
     })
   }
