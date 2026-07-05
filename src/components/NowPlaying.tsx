@@ -15,6 +15,7 @@ interface Props {
   onPrevious: () => void
   onSetVolume: (v: number) => void
   onSetLoop: (m: LoopMode) => void
+  onSeek: (s: number) => void
 }
 
 function formatTime(seconds: number): string {
@@ -23,7 +24,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-export function NowPlayingView({ status, volume, loopMode, deviceName, syncState, syncVolume, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop }: Props) {
+export function NowPlayingView({ status, volume, loopMode, deviceName, syncState, syncVolume, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop, onSeek }: Props) {
   const sonos = status?.sonos
   const queue = status?.queue.queue || []
   const currentIndex = status?.queue.currentIndex ?? -1
@@ -107,7 +108,11 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, syncState
                 value={progress}
                 className="np-seek"
                 aria-label="Seek"
-                onChange={() => {}}
+                onChange={(e) => {
+                  const pct = parseFloat(e.target.value)
+                  const dur = sonos.track.duration
+                  if (dur > 0) onSeek((pct / 100) * dur)
+                }}
               />
             </div>
             <div className="np-times">

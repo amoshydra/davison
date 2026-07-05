@@ -126,6 +126,7 @@ export function usePlayback() {
     next: () => send('next'),
     previous: () => send('previous'),
     setVolume: (volume: number) => send('volume', { volume }),
+    seekTo: (seconds: number) => send('seek', { seconds }),
     setLoop: (mode: LoopMode) => send('loop', { mode }),
     addToQueue: (trackIds: string[]) => send('queue/add', { trackIds }),
     playNow: (trackIds: string[]) => send('queue/play-now', { trackIds }),

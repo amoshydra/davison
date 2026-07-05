@@ -320,6 +320,10 @@ class SonosController extends EventEmitter {
     await this.getDevice()?.setVolume(volume)
   }
 
+  async seek(seconds: number): Promise<void> {
+    await this.getDevice()?.seek(seconds)
+  }
+
   async getVolume(): Promise<number> {
     return (await this.getDevice()?.getVolume()) ?? 0
   }

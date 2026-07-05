@@ -183,6 +183,7 @@ export function App() {
               onPrevious={optPrevious}
               onSetVolume={optVolume}
               onSetLoop={playback.setLoop}
+              onSeek={playback.seekTo}
             />
           </div>
 

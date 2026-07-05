@@ -104,6 +104,18 @@ export function createApiRouter(): Router {
     res.json({ success: true })
   })
 
+  router.post('/seek', (req, res) => {
+    const seconds = asNumber(req.body?.seconds, NaN)
+    if (isNaN(seconds) || seconds < 0) {
+      res.status(400).json({ error: 'seconds must be a non-negative number' })
+      return
+    }
+    sonosController.seek(seconds).catch(err => {
+      console.warn('Failed to seek:', err)
+    })
+    res.json({ success: true })
+  })
+
   router.get('/queue', (_req, res) => {
     res.json(queueManager.getQueue())
   })
