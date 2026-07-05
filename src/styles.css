@@ -11,6 +11,12 @@
   --text2: #a3a3a3;
   --text3: #666;
 
+  /* layout constants for optical alignment */
+  --arrow-w: 16px;
+  --checkbox-w: 28px;
+  --hd-px: 8px;   /* dir-header padding-left at depth 0 */
+  --it-px: 6px;   /* track-item padding-left at depth 0 */
+
   /* dynamic album-art color (set inline, falls back to accent) */
   --cover-rgb: 6, 182, 212;
   --cover-dim: rgba(var(--cover-rgb), .08);
@@ -450,11 +456,13 @@ body {
 
 /* Checkbox */
 .track-check {
-  width: 28px; height: 28px; border-radius: var(--sp-6);
+  width: var(--checkbox-w); height: var(--checkbox-w);
+  border-radius: var(--sp-6);
   border: 1.5px solid var(--surface3);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: all .12s; cursor: pointer; color: transparent;
   opacity: 0;
+  margin-left: calc(var(--hd-px) + var(--arrow-w) - var(--it-px) - var(--checkbox-w));
 }
 .track-check.checked { opacity: 1 !important; background: var(--accent); border-color: var(--accent); color: var(--bg); }
 .select-mode .track-check { opacity: 1; }
@@ -486,7 +494,7 @@ body {
 .dir-header:active { background: var(--surface); }
 @media (hover: hover) { .dir-header:hover { background: var(--surface); } }
 
-.dir-arrow { font-size: .6rem; color: var(--text3); width: 16px; flex-shrink: 0; }
+.dir-arrow { font-size: .6rem; color: var(--text3); width: var(--arrow-w); flex-shrink: 0; }
 
 .dir-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
