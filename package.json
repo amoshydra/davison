@@ -1,6 +1,6 @@
 {
   "name": "@amoshydra/davison",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "WebDAV music server + Sonos controller. npx @amoshydra/davison --path /music",
   "type": "module",
   "bin": {
