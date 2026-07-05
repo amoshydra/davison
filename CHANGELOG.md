@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/amoshydra/davison/compare/v0.1.0...v0.2.0) (2026-07-05)
+
+
+### Features
+
+* local browser playback mode ([cc69b48](https://github.com/amoshydra/davison/commit/cc69b48dafb01df52e15777c85ad0ee65d70394a))
+
+
+### Bug Fixes
+
+* implement seek slider ([6fe898b](https://github.com/amoshydra/davison/commit/6fe898b4bea61e30671e1e02cc27d84ead2d4c64))
+
 ## [0.1.0](https://github.com/amoshydra/davison/compare/v0.0.4...v0.1.0) (2026-07-05)
 
 
