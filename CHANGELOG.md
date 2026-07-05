@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.3](https://github.com/amoshydra/davison/compare/v0.0.2...v0.0.3) (2026-07-05)
+
+
+### Bug Fixes
+
+* add repository field for npm provenance ([9c5da49](https://github.com/amoshydra/davison/commit/9c5da4965b9b7b1ea858d16e8e97455565649610))
+* set cwd to package root so vite-express finds dist ([47eef9d](https://github.com/amoshydra/davison/commit/47eef9d5368d2b76d45df92addae5b0bf543e9ea))
+
 ## [0.0.2](https://github.com/amoshydra/davison/compare/v0.0.1...v0.0.2) (2026-07-05)
 
 
