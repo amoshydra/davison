@@ -232,10 +232,13 @@ body {
 
 .vinyl-disc {
   width: 100%; height: 100%; border-radius: 50%;
-  background: conic-gradient(from 0deg, #222, #333, #2a2a2a, #444, #222);
+  background:
+    conic-gradient(from 0deg, #222, #333, #2a2a2a, #444, #222),
+    radial-gradient(circle, rgba(var(--cover-rgb), .12) 0%, transparent 70%);
+  background-blend-mode: overlay;
   animation: spin 4s linear infinite;
   animation-play-state: paused; position: relative;
-  box-shadow: 0 8px 40px rgba(0,0,0,.4);
+  box-shadow: 0 8px 40px rgba(0,0,0,.4), 0 0 60px rgba(var(--cover-rgb), .1);
 }
 
 .now-playing-cover {
