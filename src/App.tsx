@@ -161,7 +161,8 @@ export function App() {
               volume={syncVolume !== null ? syncVolume : vol}
               loopMode={status.status?.queue.loopMode || 'all'}
               deviceName={devices.selectedDevice?.name}
-              syncing={syncState !== null || syncVolume !== null}
+              syncState={syncState}
+              syncVolume={syncVolume}
               onPlay={optPlay}
               onPause={optPause}
               onNext={optNext}
@@ -209,7 +210,8 @@ export function App() {
             status={status.status}
             volume={syncVolume !== null ? syncVolume : vol}
             deviceName={devices.selectedDevice?.name}
-            syncing={syncState !== null || syncVolume !== null}
+            syncState={syncState}
+            syncVolume={syncVolume}
             onPlay={optPlay}
             onPause={optPause}
             onNext={optNext}

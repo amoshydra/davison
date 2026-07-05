@@ -7,7 +7,8 @@ interface Props {
   volume: number
   loopMode: LoopMode
   deviceName?: string
-  syncing?: boolean
+  syncState?: string | null
+  syncVolume?: number | null
   onPlay: () => void
   onPause: () => void
   onNext: () => void
@@ -22,7 +23,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-export function NowPlayingView({ status, volume, loopMode, deviceName, syncing, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop }: Props) {
+export function NowPlayingView({ status, volume, loopMode, deviceName, syncState, syncVolume, onPlay, onPause, onNext, onPrevious, onSetVolume, onSetLoop }: Props) {
   const sonos = status?.sonos
   const queue = status?.queue.queue || []
   const currentIndex = status?.queue.currentIndex ?? -1
@@ -134,7 +135,7 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, syncing, 
       </div>
 
       {/* Bottom row — pinned */}
-      <div className={`np-bottom-row${syncing ? ' syncing' : ''}`}>
+      <div className="np-bottom-row">
         <div className="np-bottom-controls">
           <button className="np-btn" onClick={toggleLoop} aria-label="Toggle loop">
             {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
@@ -143,14 +144,14 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, syncing, 
           <button className="np-btn" onClick={onPrevious} aria-label="Previous">
             <SkipBack size={22} />
           </button>
-          <button className="np-play" onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+          <button className={`np-play${syncState ? ' syncing' : ''}`} onClick={isPlaying ? onPause : onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
             {isPlaying ? <Pause size={28} /> : <Play size={28} />}
           </button>
           <button className="np-btn" onClick={onNext} aria-label="Next">
             <SkipForward size={22} />
           </button>
         </div>
-        <div className="np-bottom-volume">
+        <div className={`np-bottom-volume${syncVolume !== null && syncVolume !== undefined ? ' syncing' : ''}`}>
           <button className="nv-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
             <Minus size={13} />
           </button>
