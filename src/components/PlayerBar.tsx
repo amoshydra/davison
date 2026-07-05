@@ -36,9 +36,11 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
 
   if (!track) return null
 
+  const noDevice = track && !sonos
+
   return (
     <div className="player-bar" onClick={onClickTrack}>
-      <div className="player-bar-progress" style={{ width: `${progress}%` }} />
+      <div className="player-bar-progress" style={{ width: noDevice ? '100%' : `${progress}%`, opacity: noDevice ? .3 : 1 }} />
       <div className="player-bar-content">
         <div className="player-bar-track">
           <div className="player-bar-cover">
@@ -50,7 +52,10 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
           </div>
           <div className="player-bar-text">
             <span className="player-bar-title">{track.title}</span>
-            <span className="player-bar-artist">{track.artist}{deviceName ? ` · ${deviceName}` : ''}</span>
+            <span className="player-bar-artist">
+              {noDevice ? 'Select a device in Settings to play' : track.artist}
+              {deviceName && !noDevice ? ` · ${deviceName}` : ''}
+            </span>
           </div>
         </div>
         <div className="player-bar-controls" onClick={e => e.stopPropagation()}>

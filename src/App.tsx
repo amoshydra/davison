@@ -141,6 +141,7 @@ export function App() {
               queue={status.status?.queue.queue || []}
               currentIndex={status.status?.queue.currentIndex ?? null}
               currentTrack={status.status?.queue.currentTrack || null}
+              hasDevice={!!status.status?.sonos}
               onRemove={playback.removeFromQueue}
               onClear={playback.clearQueue}
               onJumpTo={playback.jumpTo}

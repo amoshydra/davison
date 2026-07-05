@@ -47,9 +47,9 @@ export function useDevices() {
       }
       setDevices(d)
 
-      const stillExists = selectedId && d.some(dev => dev.id === selectedId)
-      if (stillExists) {
-        cacheSet(CACHE_KEY_SELECTED, selectedId)
+      const existingDevice = selectedId && d.find(dev => dev.id === selectedId)
+      if (existingDevice) {
+        await select(existingDevice.id)
       } else if (d.length > 0) {
         await select(d[0].id)
       } else {

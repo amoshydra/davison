@@ -5,12 +5,13 @@ interface Props {
   queue: MusicTrack[]
   currentIndex: number | null
   currentTrack: MusicTrack | null
+  hasDevice: boolean
   onRemove: (index: number) => void
   onClear: () => void
   onJumpTo: (trackId: string) => void
 }
 
-export function QueueView({ queue, currentIndex, currentTrack, onRemove, onClear, onJumpTo }: Props) {
+export function QueueView({ queue, currentIndex, currentTrack, hasDevice, onRemove, onClear, onJumpTo }: Props) {
   if (queue.length === 0 && !currentTrack) {
     return (
       <div className="queue-view">
@@ -44,6 +45,11 @@ export function QueueView({ queue, currentIndex, currentTrack, onRemove, onClear
             <h3>{currentTrack.title}</h3>
             <p>{currentTrack.artist}</p>
           </div>
+          {!hasDevice && (
+            <div className="queue-pending">
+              Tracks queued — select a Sonos device in Settings to start playback
+            </div>
+          )}
         </>
       )}
 
