@@ -264,21 +264,38 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayNext }: Pr
 
   return (
     <div className="music-browser">
-      <input
-        type="text"
-        placeholder="Search tracks, artists, albums..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
-      <div className="browser-actions">
-        <span>{tracks.length} tracks</span>
+      <div className="browser-header">
+        <input
+          type="text"
+          placeholder="Search tracks, artists, albums..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <div className="browser-actions">
+          <span>{tracks.length} tracks</span>
+          {selectMode && selected.size > 0 && (
+            <span className="select-count">{selected.size} selected</span>
+          )}
+          {selectMode && (
+            <button className="browser-done" onClick={exitSelectMode}>
+              Done
+            </button>
+          )}
+        </div>
         {selectMode && selected.size > 0 && (
-          <span className="select-count">{selected.size} selected</span>
-        )}
-        {selectMode && (
-          <button className="browser-done" onClick={exitSelectMode}>
-            Done
-          </button>
+          <div className="select-actions-inline">
+            <button onClick={() => { onPlayNow(Array.from(selected)[0]); exitSelectMode() }}>
+              Play
+            </button>
+            {onPlayNext && (
+              <button onClick={() => { onPlayNext(Array.from(selected)); exitSelectMode() }}>
+                Play Next
+              </button>
+            )}
+            <button onClick={() => { onAddToQueue(Array.from(selected)); exitSelectMode() }}>
+              Add{selected.size > 1 ? ` ${selected.size}` : ''}
+            </button>
+          </div>
         )}
       </div>
 
@@ -297,7 +314,7 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayNext }: Pr
           </button>
         </div>
       )}
-      <div className={`track-list${selectMode ? ' select-mode' : ''}${selectMode && selected.size > 0 ? ' has-floating-bar' : ''}`}>
+      <div className={`track-list${selectMode ? ' select-mode' : ''}`}>
         {filtered.map(root => (
           <DirSection
             key={root.name}

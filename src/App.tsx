@@ -85,14 +85,12 @@ export function App() {
         {/* Content panels */}
         <div className="view-panel">
           {view === 'library' && (
-            <div className="scroll-area" style={{ paddingTop: 12 }}>
               <MusicBrowser
                 tracks={music.tracks}
                 onAddToQueue={playback.addToQueue}
                 onPlayNow={handlePlayNow}
                 onPlayNext={playback.playNext}
               />
-            </div>
           )}
 
           {view === 'now-playing' && (
