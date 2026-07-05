@@ -496,7 +496,6 @@ body {
   background: rgba(13, 13, 13, .85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--surface3);
 }
 .dir-header:active { background: var(--surface); }
 @media (hover: hover) { .dir-header:hover { background: var(--surface); } }
