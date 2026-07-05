@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/amoshydra/davison/compare/v0.0.4...v0.1.0) (2026-07-05)
+
+
+### Features
+
+* optional WebDAV auth via --webdav-user/--webdav-pass ([786e4af](https://github.com/amoshydra/davison/commit/786e4af2e04db348f664b445a5a12ea3dfe99715))
+
 ## [0.0.4](https://github.com/amoshydra/davison/compare/v0.0.3...v0.0.4) (2026-07-05)
 
 
