@@ -1,6 +1,6 @@
 import express from 'express'
 import ViteExpress from 'vite-express'
-import { resolve, dirname } from 'node:path'
+import { resolve, dirname, isAbsolute } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { config } from './config.js'
@@ -26,6 +26,12 @@ const options = program.opts()
 config.port = parseInt(options.port, 10) || 3000
 if (options.host) config.host = options.host
 config.musicPaths = options.path || []
+
+// Resolve relative paths against original cwd before main() may chdir
+const originalCwd = process.cwd()
+config.musicPaths = config.musicPaths.map((p: string) =>
+  isAbsolute(p) ? p : resolve(originalCwd, p),
+)
 
 config.musicPaths.forEach(p => {
   if (p.includes(' ')) {
