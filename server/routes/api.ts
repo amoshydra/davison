@@ -26,7 +26,6 @@ export function createApiRouter(): Router {
       res.status(404).json({ error: 'Device not found' })
       return
     }
-    void sonosController.startListening()
     res.json({ success: true })
   })
 

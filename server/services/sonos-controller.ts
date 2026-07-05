@@ -59,7 +59,6 @@ class SonosController extends EventEmitter {
   private devices: Map<string, Sonos> = new Map()
   private deviceInfo: Map<string, SonosDevice> = new Map()
   private selectedDevice: string | null = null
-  private listening = false
 
   async discoverDevices(timeout = 5000): Promise<SonosDevice[]> {
     this.devices.clear()
@@ -271,47 +270,6 @@ class SonosController extends EventEmitter {
 
   async flushQueue(): Promise<void> {
     await this.getDevice()?.flush()
-  }
-
-  async startListening(): Promise<void> {
-    const device = this.getDevice()
-    if (!device || this.listening) return
-
-    try {
-      await device.startListening()
-      this.listening = true
-
-      device.on('PlayState', (state: string) => {
-        this.emit('play-state', state)
-      })
-
-      device.on('CurrentTrack', (track: Record<string, unknown>) => {
-        this.emit('current-track', track)
-      })
-
-      device.on('AVTransport', (event: Record<string, unknown>) => {
-        this.emit('av-transport', event)
-      })
-
-      device.on('Volume', (volume: number) => {
-        this.emit('volume-change', volume)
-      })
-    } catch (err) {
-      console.warn('Failed to start UPnP event listening:', err)
-    }
-  }
-
-  async stopListening(): Promise<void> {
-    const device = this.getDevice()
-    if (!device || !this.listening) return
-
-    try {
-      await device.stopListening()
-      this.listening = false
-      device.removeAllListeners()
-    } catch {
-      // ignore
-    }
   }
 }
 

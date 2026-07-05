@@ -6,6 +6,7 @@ import { discoverMusic } from './services/music-discovery.js'
 import { sonosController } from './services/sonos-controller.js'
 import { loadPlaylists } from './services/playlist-store.js'
 import { createApiRouter } from './routes/api.js'
+import { startAutoAdvancePolling } from './services/queue-manager.js'
 
 const program = new Command()
 
@@ -63,6 +64,7 @@ async function main() {
 
   ViteExpress.listen(app, config.port, () => {
     console.log(`Sonos Node running at http://${config.host}:${config.port}`)
+    startAutoAdvancePolling()
   })
 }
 

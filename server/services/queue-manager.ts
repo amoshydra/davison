@@ -190,3 +190,35 @@ class QueueManager extends EventEmitter {
 }
 
 export const queueManager = new QueueManager()
+
+let pollTimer: ReturnType<typeof setInterval> | null = null
+let lastTrackId: string | null = null
+
+export function startAutoAdvancePolling(): void {
+  if (pollTimer) return
+  pollTimer = setInterval(async () => {
+    const status = await sonosController.getStatus()
+    if (!status) return
+
+    const current = queueManager.getCurrentTrack()
+    if (!current || status.state === 'PLAYING') return
+
+    if (status.state === 'STOPPED' && status.track.duration > 0) {
+      const elapsed = status.track.position
+      const remaining = status.track.duration - elapsed
+      if (remaining < 2) {
+        const nextId = queueManager.getNextTrack()
+        if (nextId) {
+          await queueManager.next()
+        }
+      }
+    }
+  }, 2000)
+}
+
+export function stopAutoAdvancePolling(): void {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+}
