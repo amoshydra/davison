@@ -25,11 +25,6 @@ function buildDirs(tracks: MusicTrack[]): DirNode[] {
     const dirParts = track.baseName ? [track.baseName, ...parts] : parts
     let level = roots
 
-    // For root-level tracks (no directory), group under '<root>' folder
-    if (parts.length === 0 && track.baseName) {
-      dirParts.push('<root>')
-    }
-
     for (const segment of dirParts) {
       let dir = level.find(d => d.name === segment)
       if (!dir) {
@@ -42,12 +37,45 @@ function buildDirs(tracks: MusicTrack[]): DirNode[] {
     level.push({ name: fileName, tracks: [track], dirs: [] })
   }
 
-  // folders first, then loose tracks
+  // Post-process: any node with both subfolders and loose track leaves
+  // gets the track leaves moved into a <root> subdirectory
+  function wrapRootTracks(node: DirNode) {
+    const trackLeaves = node.dirs.filter(d => d.dirs.length === 0 && d.tracks.length <= 1)
+    const subdirs = node.dirs.filter(d => d.dirs.length > 0 || d.tracks.length > 1)
+
+    if (trackLeaves.length > 0 && subdirs.length > 0) {
+      node.dirs = [
+        ...subdirs,
+        { name: '<root>', tracks: trackLeaves.flatMap(d => d.tracks), dirs: [] },
+      ]
+    }
+
+    for (const sub of node.dirs) {
+      wrapRootTracks(sub)
+    }
+    node.dirs.sort((a, b) => {
+      const aF = a.dirs.length > 0 || a.tracks.length > 1 || a.name === '<root>'
+      const bF = b.dirs.length > 0 || b.tracks.length > 1 || b.name === '<root>'
+      if (aF && !bF) return -1
+      if (!aF && bF) return 1
+      // both are folders — '<root>' always last
+      if (a.name === '<root>') return 1
+      if (b.name === '<root>') return -1
+      return a.name.localeCompare(b.name)
+    })
+  }
+  for (const root of roots) {
+    wrapRootTracks(root)
+  }
+
+  // also sort root level: folders first, '<root>' last, then loose tracks
   roots.sort((a, b) => {
-    const aIsFolder = a.dirs.length > 0 || a.tracks.length > 1
-    const bIsFolder = b.dirs.length > 0 || b.tracks.length > 1
-    if (aIsFolder && !bIsFolder) return -1
-    if (!aIsFolder && bIsFolder) return 1
+    const aF = a.dirs.length > 0 || a.tracks.length > 1 || a.name === '<root>'
+    const bF = b.dirs.length > 0 || b.tracks.length > 1 || b.name === '<root>'
+    if (aF && !bF) return -1
+    if (!aF && bF) return 1
+    if (a.name === '<root>') return 1
+    if (b.name === '<root>') return -1
     return a.name.localeCompare(b.name)
   })
 
@@ -137,7 +165,7 @@ function DirSection({
 }) {
   const [collapsed, setCollapsed] = useState(depth > 0)
 
-  const isLeaf = dir.dirs.length === 0 && dir.tracks.length <= 1
+  const isLeaf = dir.dirs.length === 0 && dir.tracks.length <= 1 && dir.name !== '<root>'
   const track = isLeaf ? dir.tracks[0] : null
 
   const allIds = useMemo(() => flattenIds(dir), [dir])
