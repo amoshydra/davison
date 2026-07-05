@@ -26,6 +26,9 @@ importers:
       lucide-react:
         specifier: ^1.23.0
         version: 1.23.0(react@18.3.1)
+      mime:
+        specifier: ^4.1.0
+        version: 4.1.0
       music-metadata:
         specifier: ^10.6.0
         version: 10.9.1
@@ -45,6 +48,9 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.25
+      '@types/mime':
+        specifier: ^4.0.0
+        version: 4.0.0
       '@types/node':
         specifier: ^22.5.0
         version: 22.20.0
@@ -693,6 +699,10 @@ packages:
 
   '@types/mime@1.3.5':
     resolution: {integrity: sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==}
+
+  '@types/mime@4.0.0':
+    resolution: {integrity: sha512-5eEkJZ/BLvTE3vXGKkWlyTSUVZuzj23Wj8PoyOq2lt5I3CYbiLBOPb3XmCW6QcuOibIUE6emHXHt9E/F/rCa6w==}
+    deprecated: This is a stub types definition. mime provides its own type definitions, so you do not need this installed.
 
   '@types/node@22.20.0':
     resolution: {integrity: sha512-QWlFW2wf3nTjC13/DqRnBpR4ZO36VJH/JVBkA/vcnmbTBNQIlnObqyqZE1tUR7+Ni23Lda8R1BxMfbXRpCUx5g==}
@@ -1928,6 +1938,10 @@ snapshots:
   '@types/http-errors@2.0.5': {}
 
   '@types/mime@1.3.5': {}
+
+  '@types/mime@4.0.0':
+    dependencies:
+      mime: 4.1.0
 
   '@types/node@22.20.0':
     dependencies:
