@@ -5,9 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  nephele:
-    hash: 2c5231b423754c7330f197cfb39011120c5a9fba649beb38cfadc8eef41a4747
-    path: patches/nephele.patch
+  nephele@1.0.0-alpha.67: 2c5231b423754c7330f197cfb39011120c5a9fba649beb38cfadc8eef41a4747
 
 importers:
 
