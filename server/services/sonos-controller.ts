@@ -248,6 +248,10 @@ class SonosController extends EventEmitter {
     return true
   }
 
+  hasDevice(): boolean {
+    return this.selectedDevice !== null
+  }
+
   private getDevice(): Sonos | undefined {
     if (!this.selectedDevice) return undefined
     return this.devices.get(this.selectedDevice)
@@ -323,8 +327,7 @@ class SonosController extends EventEmitter {
   async playUri(uri: string, title?: string): Promise<void> {
     const device = this.getDevice()
     if (!device) {
-      console.warn('Cannot play URI: no device selected')
-      return
+      throw new Error('No device selected')
     }
 
     const trackTitle = title || uri.split('/').pop() || 'Music'

@@ -289,8 +289,18 @@ class QueueManager extends EventEmitter {
     this.emit('loop-change', mode)
   }
 
-  setAutoPlay(auto: boolean): void {
+  async setAutoPlay(auto: boolean): Promise<void> {
     this.state.autoPlay = auto
+  }
+
+  /** Re-send current track URI — used when device becomes available after queue was filled */
+  async resumePlayback(): Promise<void> {
+    await this.serialized(async () => {
+      if (!sonosController.hasDevice()) return
+      const track = this.getCurrentTrack()
+      if (!track) return
+      await this.playTrack(this.state.currentIndex!)
+    })
   }
 
   async jumpTo(trackId: string): Promise<void> {

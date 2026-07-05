@@ -34,7 +34,7 @@ export function createApiRouter(): Router {
     res.json(devices)
   })
 
-  router.post('/devices/select', (req, res) => {
+  router.post('/devices/select', async (req, res) => {
     const id = asString(req.body?.id)
     if (!id) {
       res.status(400).json({ error: 'Device id is required' })
@@ -45,6 +45,10 @@ export function createApiRouter(): Router {
       res.status(404).json({ error: 'Device not found' })
       return
     }
+    // Resume playback if tracks were queued while no device was selected
+    await queueManager.resumePlayback().catch(err => {
+      console.warn('Failed to resume playback after device select:', err)
+    })
     res.json({ success: true })
   })
 
