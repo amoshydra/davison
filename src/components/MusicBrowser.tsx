@@ -205,14 +205,14 @@ function DirSection({
         style={{ '--depth': depth } as React.CSSProperties}
         onClick={() => setCollapsed(!collapsed)}
       >
-        <span className="dir-arrow">
-          {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-        </span>
         <span
           className={`track-check${allSelected ? ' checked' : ''}`}
           onClick={e => { e.stopPropagation(); onToggleMany(allIds) }}
         >
           {allSelected ? <Check size={14} /> : someSelected ? <Minus size={14} /> : null}
+        </span>
+        <span className="dir-arrow">
+          {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
         </span>
         <span className="dir-name">{dir.name}</span>
         <span className="dir-count">{allIds.length}</span>
