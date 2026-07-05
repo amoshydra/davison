@@ -22,12 +22,9 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   const [coverError, setCoverError] = useState(false)
   const coverTrackId = sonos?.track.trackId || track?.id
   const coverImgUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
+  const noDevice = !!track && !sonos
 
   useEffect(() => { setCoverError(false) }, [coverTrackId])
-
-  if (!track) return null
-
-  const noDevice = track && !sonos
 
   const handlePlayPause = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -38,6 +35,8 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
 
   const handleNext = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onNext() }, [onNext])
   const handlePrevious = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onPrevious() }, [onPrevious])
+
+  if (!track) return null
 
   return (
     <div className="player-bar" onClick={onClickTrack}>

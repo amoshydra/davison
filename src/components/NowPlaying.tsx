@@ -105,6 +105,7 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
                 value={progress}
                 className="np-seek"
                 aria-label="Seek"
+                onChange={() => {}}
               />
             </div>
             <div className="np-times">
