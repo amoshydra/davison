@@ -65,16 +65,6 @@ async function main() {
     console.log(`Serving ${config.musicPaths.length} music director${config.musicPaths.length > 1 ? 'ies' : 'y'} at /music-files/*`)
   }
 
-  // Start device discovery in background (non-blocking)
-  sonosController.discoverDevices().then(devices => {
-    console.log(`Discovered ${devices.length} Sonos device(s)`)
-    if (devices.length > 0) {
-      console.log(`  ${devices.map(d => `${d.name} (${d.ip})`).join('\n  ')}`)
-    }
-  }).catch(err => {
-    console.warn('Device discovery failed:', err)
-  })
-
   server = ViteExpress.listen(app, config.port, () => {
     console.log(`Sonos Node running at http://${config.host}:${config.port}`)
     startAutoAdvancePolling()
