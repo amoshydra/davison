@@ -5,6 +5,7 @@ import type { MusicTrack, ServerStatus } from '../types'
 interface Props {
   status: ServerStatus | null
   volume: number
+  deviceName?: string
   onPlay: () => void
   onPause: () => void
   onNext: () => void
@@ -13,7 +14,7 @@ interface Props {
   onClickTrack: () => void
 }
 
-export function PlayerBar({ status, volume, onPlay, onPause, onNext, onPrevious, onSetVolume, onClickTrack }: Props) {
+export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext, onPrevious, onSetVolume, onClickTrack }: Props) {
   const track = status?.queue.currentTrack
   const sonos = status?.sonos
   const isPlaying = sonos?.state === 'PLAYING'
@@ -42,7 +43,7 @@ export function PlayerBar({ status, volume, onPlay, onPause, onNext, onPrevious,
           </div>
           <div className="player-bar-text">
             <span className="player-bar-title">{track.title}</span>
-            <span className="player-bar-artist">{track.artist}</span>
+            <span className="player-bar-artist">{track.artist}{deviceName ? ` · ${deviceName}` : ''}</span>
           </div>
         </div>
         <div className="player-bar-controls" onClick={e => e.stopPropagation()}>

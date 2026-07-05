@@ -139,6 +139,7 @@ export function App() {
       <PlayerBar
         status={status.status}
         volume={vol}
+        deviceName={devices.selectedDevice?.name}
         onPlay={playback.play}
         onPause={playback.pause}
         onNext={playback.next}
