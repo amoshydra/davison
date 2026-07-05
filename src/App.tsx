@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Music, ListMusic, Disc3, ListOrdered, Settings } from 'lucide-react'
 import { useDevices, useMusic, useStatus, usePlayback, usePlaylists } from './hooks/useSonosApi'
+import type { SonosStatus } from './types'
 import { DeviceSelector } from './components/DeviceSelector'
 import { MusicBrowser } from './components/MusicBrowser'
 import { NowPlayingView } from './components/NowPlaying'
@@ -49,34 +50,50 @@ export function App() {
     if (devices.selectedId) status.startPolling()
   }, [devices.selectedId])
 
-  // Optimistic state — immediate UI feedback while server processes
-  const [syncCounter, setSyncCounter] = useState(0)
+  // Optimistic sync — immediate UI, cleared when poll confirms or 5s safety
+  const [syncState, setSyncState] = useState<SonosStatus['state'] | null>(null)
+  const [syncVolume, setSyncVolume] = useState<number | null>(null)
   const syncTimer = useRef<ReturnType<typeof setTimeout>>()
 
-  function bumpSync() {
-    setSyncCounter(c => c + 1)
+  function setSyncWithTimeout<T>(setter: (v: T | null) => void, value: T) {
+    setter(value)
     if (syncTimer.current) clearTimeout(syncTimer.current)
-    syncTimer.current = setTimeout(() => setSyncCounter(0), 2000)
+    syncTimer.current = setTimeout(() => {
+      setSyncState(null)
+      setSyncVolume(null)
+    }, 5000)
   }
 
+  useEffect(() => {
+    return () => { if (syncTimer.current) clearTimeout(syncTimer.current) }
+  }, [])
+
+  // Clear sync when polled server state matches our optimistic value
+  useEffect(() => {
+    const s = status.status?.sonos
+    if (!s) return
+    if (syncState !== null && s.state === syncState) setSyncState(null)
+    if (syncVolume !== null && s.volume === syncVolume) setSyncVolume(null)
+  }, [status.status?.sonos])
+
   const optPlay = useCallback(() => {
-    bumpSync()
+    setSyncWithTimeout(setSyncState, 'PLAYING')
     playback.play()
   }, [playback])
   const optPause = useCallback(() => {
-    bumpSync()
+    setSyncWithTimeout(setSyncState, 'PAUSED_PLAYBACK')
     playback.pause()
   }, [playback])
   const optVolume = useCallback((v: number) => {
-    bumpSync()
+    setSyncWithTimeout(setSyncVolume, v)
     playback.setVolume(v)
   }, [playback])
   const optNext = useCallback(() => {
-    bumpSync()
+    setSyncWithTimeout(setSyncState, 'PLAYING')
     playback.next()
   }, [playback])
   const optPrevious = useCallback(() => {
-    bumpSync()
+    setSyncWithTimeout(setSyncState, 'PLAYING')
     playback.previous()
   }, [playback])
 
@@ -155,10 +172,11 @@ export function App() {
           <div className="view-stack" style={{ display: view === 'now-playing' ? 'flex' : 'none' }}>
             <NowPlayingView
               status={status.status}
-              volume={vol}
+              volume={syncVolume ?? vol}
               loopMode={status.status?.queue.loopMode || 'all'}
               deviceName={devices.selectedDevice?.name}
-              syncing={syncCounter > 0}
+              syncState={syncState}
+              syncVolume={syncVolume}
               onPlay={optPlay}
               onPause={optPause}
               onNext={optNext}
@@ -204,9 +222,10 @@ export function App() {
         {view !== 'now-playing' && (
           <PlayerBar
             status={status.status}
-            volume={vol}
+            volume={syncVolume ?? vol}
             deviceName={devices.selectedDevice?.name}
-            syncing={syncCounter > 0}
+            syncState={syncState}
+            syncVolume={syncVolume}
             onPlay={optPlay}
             onPause={optPause}
             onNext={optNext}

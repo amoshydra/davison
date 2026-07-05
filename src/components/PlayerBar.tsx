@@ -6,7 +6,8 @@ interface Props {
   status: ServerStatus | null
   volume: number
   deviceName?: string
-  syncing?: boolean
+  syncState?: string | null
+  syncVolume?: number | null
   onPlay: () => void
   onPause: () => void
   onNext: () => void
@@ -15,7 +16,7 @@ interface Props {
   onClickTrack: () => void
 }
 
-export function PlayerBar({ status, volume, deviceName, syncing, onPlay, onPause, onNext, onPrevious, onSetVolume, onClickTrack }: Props) {
+export function PlayerBar({ status, volume, deviceName, syncState, syncVolume, onPlay, onPause, onNext, onPrevious, onSetVolume, onClickTrack }: Props) {
   const track = status?.queue.currentTrack
   const sonos = status?.sonos
   const isPlaying = sonos?.state === 'PLAYING'
@@ -40,7 +41,7 @@ export function PlayerBar({ status, volume, deviceName, syncing, onPlay, onPause
   if (!track) return null
 
   return (
-    <div className={`player-bar${syncing ? ' syncing' : ''}`} onClick={onClickTrack}>
+    <div className="player-bar" onClick={onClickTrack}>
       <div className="player-bar-progress" style={{ width: noDevice ? '100%' : `${progress}%`, opacity: noDevice ? .3 : 1 }} />
       <div className="player-bar-content">
         <div className="player-bar-track">
@@ -61,12 +62,12 @@ export function PlayerBar({ status, volume, deviceName, syncing, onPlay, onPause
         </div>
         <div className="player-bar-controls" onClick={e => e.stopPropagation()}>
           <button onClick={handlePrevious} aria-label="Previous"><SkipBack size={18} /></button>
-          <button onClick={handlePlayPause} aria-label={isPlaying ? 'Pause' : noDevice ? 'Cancel' : 'Play'}>
+          <button className={syncState ? 'syncing' : ''} onClick={handlePlayPause} aria-label={isPlaying ? 'Pause' : noDevice ? 'Cancel' : 'Play'}>
             {noDevice ? <Loader2 size={20} className="spin" /> : isPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>
           <button onClick={handleNext} aria-label="Next"><SkipForward size={18} /></button>
         </div>
-        <div className="player-bar-volume" onClick={e => e.stopPropagation()}>
+        <div className={`player-bar-volume${syncVolume !== null ? ' syncing' : ''}`} onClick={e => e.stopPropagation()}>
           <button className="pv-btn" onClick={() => onSetVolume(Math.max(0, volume - 5))} aria-label="Volume down">
             <Minus size={14} />
           </button>
