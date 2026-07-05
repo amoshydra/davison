@@ -440,7 +440,7 @@ body {
 
 .track-list {
   flex: 1; overflow-y: auto; min-width: 0;
-  padding: 0 var(--sp-16) var(--sp-16);
+  padding-bottom: var(--sp-16);
 }
 
 .track-list::-webkit-scrollbar { width: 4px; }
@@ -494,7 +494,10 @@ body {
   cursor: pointer; transition: background .12s;
   font-size: .9rem; font-weight: 600; color: var(--text2); user-select: none;
   position: sticky; top: 0; z-index: 2;
-  background: var(--bg);
+  background: rgba(13, 13, 13, .85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--surface3);
 }
 .dir-header:active { background: var(--surface); }
 @media (hover: hover) { .dir-header:hover { background: var(--surface); } }

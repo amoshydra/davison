@@ -112,6 +112,8 @@ function TrackRow({
   selectMode,
   onPlay,
   onToggle,
+  onTouchStart,
+  onTouchEnd,
 }: {
   track: MusicTrack
   depth: number
@@ -119,6 +121,8 @@ function TrackRow({
   selectMode: boolean
   onPlay: () => void
   onToggle: () => void
+  onTouchStart?: (e: React.TouchEvent, id: string) => void
+  onTouchEnd?: (e: React.TouchEvent) => void
 }) {
   return (
     <div
@@ -126,6 +130,9 @@ function TrackRow({
       style={{ '--depth': depth } as React.CSSProperties}
       onClick={onPlay}
       onContextMenu={e => e.preventDefault()}
+      onTouchStart={onTouchStart ? e => onTouchStart(e, track.id) : undefined}
+      onTouchEnd={onTouchEnd}
+      onTouchMove={onTouchEnd}
     >
       <span
         className={`track-check${selected ? ' checked' : ''}`}
@@ -153,6 +160,8 @@ function DirSection({
   onToggleMany,
   onAddToQueue,
   onPlayNext,
+  onTouchStart,
+  onTouchEnd,
 }: {
   dir: DirNode
   depth: number
@@ -164,6 +173,8 @@ function DirSection({
   onToggleMany: (ids: string[]) => void
   onAddToQueue: (ids: string[]) => void
   onPlayNext?: (ids: string[]) => void
+  onTouchStart?: (e: React.TouchEvent, id: string) => void
+  onTouchEnd?: (e: React.TouchEvent) => void
 }) {
   const [collapsed, setCollapsed] = useState(depth > 0)
 
@@ -192,6 +203,8 @@ function DirSection({
         selectMode={selectMode}
         onPlay={() => onPlay(track.id)}
         onToggle={() => onToggle(track.id)}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       />
     )
   }
@@ -235,6 +248,8 @@ function DirSection({
               onToggleMany={onToggleMany}
               onAddToQueue={onAddToQueue}
               onPlayNext={onPlayNext}
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
             />
           ))}
           {dir.tracks.map(t => {
@@ -248,6 +263,8 @@ function DirSection({
                 selectMode={selectMode}
                 onPlay={() => onPlay(t.id)}
                 onToggle={() => onToggle(t.id)}
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
               />
             )
           })}
@@ -362,6 +379,8 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayFolderOrNo
             onToggleMany={toggleMany}
             onAddToQueue={onAddToQueue}
             onPlayNext={onPlayNext}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           />
         ))}
       </div>
