@@ -129,30 +129,35 @@ body {
 @media (min-width: 768px) {
   .sidebar { display: flex; }
   .app-main { padding-bottom: var(--bar-h); }
-  .tab-header { display: none !important; }
+  .bottom-nav { display: none !important; }
 }
 
-/* ─── Tab header ─── */
-.tab-header {
-  display: flex; background: var(--surface);
-  border-bottom: 1px solid var(--surface3);
-  position: sticky; top: 0; z-index: 10;
-  overflow-x: auto; -webkit-overflow-scrolling: touch;
+/* ─── Bottom navigation (mobile) ─── */
+.bottom-nav {
+  display: flex; flex-shrink: 0;
+  background: rgba(13, 13, 13, .85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--surface3);
+  z-index: 10;
 }
-.tab-header::-webkit-scrollbar { display: none; }
 
-.tab-btn {
-  flex: 1; min-width: 56px;
+.bottom-tab {
+  flex: 1;
   display: flex; flex-direction: column; align-items: center;
   gap: var(--sp-2);
-  padding: var(--p-tab);
+  padding: var(--sp-4) var(--sp-2) var(--sp-6);
   border: none; background: transparent; color: var(--text3);
-  cursor: pointer; font-size: .6rem;
+  cursor: pointer; font-size: .55rem;
   transition: color .15s;
-  border-bottom: 2px solid transparent;
 }
-.tab-btn svg { width: 20px; height: 20px; }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.bottom-tab svg { width: 20px; height: 20px; }
+.bottom-tab.active { color: var(--accent); }
+
+@media (min-width: 768px) {
+  .bottom-nav { display: none !important; }
+}
 
 /* ─── Views ─── */
 .view-panel { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; position: relative; }
@@ -373,7 +378,7 @@ body {
 .np-times {
   display: flex; justify-content: space-between;
   font-size: .65rem; color: var(--text3);
-  margin-top: var(--sp-1);
+  margin-top: var(--sp-2);
 }
 
 /* Up next */
