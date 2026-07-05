@@ -37,6 +37,15 @@ function buildDirs(tracks: MusicTrack[]): DirNode[] {
     level.push({ name: fileName, tracks: [track], dirs: [] })
   }
 
+  // folders first, then loose tracks
+  roots.sort((a, b) => {
+    const aIsFolder = a.dirs.length > 0 || a.tracks.length > 1
+    const bIsFolder = b.dirs.length > 0 || b.tracks.length > 1
+    if (aIsFolder && !bIsFolder) return -1
+    if (!aIsFolder && bIsFolder) return 1
+    return a.name.localeCompare(b.name)
+  })
+
   return roots
 }
 
