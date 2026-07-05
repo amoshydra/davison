@@ -166,7 +166,10 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
     async getMediaType() { return this.getContentType() },
 
     async getStream() {
-      if (!realPath) throw Object.assign(new Error('Method Not Allowed'), { statusCode: 405 })
+      if (!realPath) {
+        const { Readable } = await import('node:stream')
+        return Readable.from([])
+      }
       return createReadStream(realPath)
     },
 
