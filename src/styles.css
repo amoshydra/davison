@@ -13,7 +13,7 @@
 
   /* layout constants for optical alignment */
   --arrow-w: 16px;
-  --checkbox-w: 28px;
+  --checkbox-w: 20px;
   --hd-px: 8px;   /* dir-header padding-left at depth 0 */
   --it-px: 6px;   /* track-item padding-left at depth 0 */
   --indent: 20px; /* nesting indent per depth level */
