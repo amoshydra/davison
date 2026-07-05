@@ -19,13 +19,17 @@ program
   .option('-p, --path <paths...>', 'Path(s) to music directories')
   .option('--port <number>', 'Server port', '4534')
   .option('--host <address>', 'Server LAN address (auto-detected if omitted)')
+  .option('--webdav-user <username>', 'WebDAV username (optional)')
+  .option('--webdav-pass <password>', 'WebDAV password (optional)')
   .parse(process.argv)
 
 const options = program.opts()
 
-config.port = parseInt(options.port, 10) || 3000
+config.port = parseInt(options.port, 10) || 4534
 if (options.host) config.host = options.host
 config.musicPaths = options.path || []
+if (options.webdavUser) config.webdavUser = options.webdavUser
+if (options.webdavPass) config.webdavPass = options.webdavPass
 
 // Resolve relative paths against original cwd before main() may chdir
 const originalCwd = process.cwd()

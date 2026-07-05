@@ -1,5 +1,5 @@
 import createServer from 'nephele'
-import { ResourceNotFoundError, BadGatewayError, ForbiddenError } from 'nephele/dist/Errors/index.js'
+import { ResourceNotFoundError, BadGatewayError, ForbiddenError, UnauthorizedError } from 'nephele/dist/Errors/index.js'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
@@ -383,14 +383,23 @@ export function initWebdav(): ReturnType<typeof createServer> {
   const tree = buildDirs(tracks)
   const adapter = new VirtualAdapter(tree)
 
-  class NoAuth {
-    async authenticate() { return { username: 'sonos' } }
+  class WebdavAuth {
+    async authenticate(request: any) {
+      if (config.webdavUser) {
+        const auth = request.headers.authorization || ''
+        const expected = 'Basic ' + Buffer.from(`${config.webdavUser}:${config.webdavPass}`).toString('base64')
+        if (auth !== expected) {
+          throw new UnauthorizedError()
+        }
+      }
+      return { username: config.webdavUser || 'davison' }
+    }
     async cleanAuthentication() {}
   }
 
   _webdavApp = createServer({
     adapter: adapter as any,
-    authenticator: new NoAuth(),
+    authenticator: new WebdavAuth(),
   })
 
   return _webdavApp
