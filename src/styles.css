@@ -16,6 +16,7 @@
   --checkbox-w: 28px;
   --hd-px: 8px;   /* dir-header padding-left at depth 0 */
   --it-px: 6px;   /* track-item padding-left at depth 0 */
+  --indent: 20px; /* nesting indent per depth level */
 
   /* dynamic album-art color (set inline, falls back to accent) */
   --cover-rgb: 6, 182, 212;
@@ -470,7 +471,9 @@ body {
 
 .track-item {
   display: flex; align-items: center; gap: var(--sp-6);
-  padding: var(--p-row-compact); border-radius: var(--r-sm);
+  padding: var(--p-row-compact);
+  padding-left: calc(var(--it-px) + var(--depth, 0) * var(--indent));
+  border-radius: var(--r-sm);
   cursor: pointer; transition: background .12s;
 }
 .track-item:active { background: var(--surface2); }
@@ -485,7 +488,9 @@ body {
 
 .dir-header {
   display: flex; align-items: center; gap: var(--sp-6);
-  padding: var(--sp-8) var(--sp-12); border-radius: var(--r-sm);
+  padding: var(--sp-8) var(--sp-12);
+  padding-left: calc(var(--hd-px) + var(--depth, 0) * var(--indent));
+  border-radius: var(--r-sm);
   cursor: pointer; transition: background .12s;
   font-size: .9rem; font-weight: 600; color: var(--text2); user-select: none;
   position: sticky; top: 0; z-index: 2;
@@ -494,7 +499,11 @@ body {
 .dir-header:active { background: var(--surface); }
 @media (hover: hover) { .dir-header:hover { background: var(--surface); } }
 
-.dir-arrow { font-size: .6rem; color: var(--text3); width: var(--arrow-w); flex-shrink: 0; }
+.dir-arrow {
+  width: var(--arrow-w); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text3);
+}
 
 .dir-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 

@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react'
-import { Check } from 'lucide-react'
+import { Check, ChevronRight, ChevronDown } from 'lucide-react'
 import type { MusicTrack } from '../types'
 
 interface Props {
@@ -123,7 +123,7 @@ function TrackRow({
   return (
     <div
       className={`track-item${selected ? ' selected' : ''}`}
-      style={{ paddingLeft: `${16 + depth * 20}px` }}
+      style={{ '--depth': depth } as React.CSSProperties}
       onClick={onPlay}
       onContextMenu={e => e.preventDefault()}
     >
@@ -198,10 +198,12 @@ function DirSection({
     <div className="dir-section">
       <div
         className="dir-header"
-        style={{ paddingLeft: `${8 + depth * 20}px` }}
+        style={{ '--depth': depth } as React.CSSProperties}
         onClick={() => setCollapsed(!collapsed)}
       >
-        <span className="dir-arrow">{collapsed ? '▶' : '▼'}</span>
+        <span className="dir-arrow">
+          {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+        </span>
         <span className="dir-name">{dir.name}</span>
         <span className="dir-count">{allIds.length}</span>
         <span className="dir-actions" onClick={e => e.stopPropagation()}>
