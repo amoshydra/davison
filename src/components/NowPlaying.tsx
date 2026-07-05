@@ -1,6 +1,7 @@
 import { ChevronLeft, Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, Volume2 } from 'lucide-react'
 import { useCallback, useState, useEffect } from 'react'
 import type { ServerStatus, LoopMode } from '../types'
+import { useAlbumColor } from '../hooks/useAlbumColor'
 
 interface Props {
   status: ServerStatus | null
@@ -32,6 +33,7 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
   const coverUrl = (sonos?.track.trackId || currentTrack?.id) ? `/api/music/cover/${sonos?.track.trackId || currentTrack?.id}` : null
   const [coverError, setCoverError] = useState(false)
+  const albumColor = useAlbumColor(coverError ? null : coverUrl)
 
   useEffect(() => { setCoverError(false) }, [sonos?.track.trackId, currentTrack?.id])
 
@@ -47,7 +49,7 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
   }, [loopMode, onSetLoop])
 
   return (
-    <div className="now-playing-view">
+    <div className="now-playing-view" style={{ '--cover-rgb': albumColor || '6, 182, 212' } as React.CSSProperties}>
       {onBack && (
         <button className="now-playing-back" onClick={onBack}>
           <ChevronLeft size={20} />

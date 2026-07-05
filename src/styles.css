@@ -11,6 +11,11 @@
   --text2: #a3a3a3;
   --text3: #666;
 
+  /* dynamic album-art color (set inline, falls back to accent) */
+  --cover-rgb: 6, 182, 212;
+  --cover-dim: rgba(var(--cover-rgb), .08);
+  --cover-glow: rgba(var(--cover-rgb), .25);
+
   /* spacing scale */
   --sp-2: 2px;  --sp-4: 4px;  --sp-6: 6px;
   --sp-8: 8px;  --sp-10: 10px; --sp-12: 12px;
@@ -53,7 +58,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
-  background: var(--bg);
+  background: radial-gradient(ellipse at 50% 0%, var(--cover-dim) 0%, var(--bg) 70%) fixed var(--bg);
   color: var(--text);
   overflow-wrap: break-word;
   word-break: break-word;
@@ -74,7 +79,9 @@ body {
   flex-direction: column; align-items: center;
   gap: var(--sp-2);
   width: 64px; padding: var(--sp-16) 0;
-  background: var(--surface);
+  background: rgba(26, 26, 26, .75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--surface3);
   position: sticky; top: 0; height: 100dvh; flex-shrink: 0;
 }
@@ -144,7 +151,10 @@ body {
 /* ─── Player Bar ─── */
 .player-bar {
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--surface); border-top: 1px solid var(--surface3);
+  background: rgba(26, 26, 26, .8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--surface3);
   z-index: 100; cursor: pointer;
 }
 @media (min-width: 768px) { .player-bar { left: 64px; } }
@@ -162,7 +172,7 @@ body {
 }
 
 .player-bar-cover {
-  width: 40px; height: 40px; border-radius: var(--sp-4);
+  width: 40px; height: 40px;
   background: var(--surface3);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
@@ -230,9 +240,8 @@ body {
 
 .now-playing-cover {
   width: 100%; height: 100%;
-  border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 8px 40px rgba(0,0,0,.4);
+  box-shadow: 0 8px 60px var(--cover-glow), 0 8px 40px rgba(0,0,0,.4);
 }
 .vinyl-disc.playing { animation-play-state: running; }
 
@@ -420,7 +429,10 @@ body {
 .queue-view { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 .queue-current {
-  background: var(--surface); border-radius: var(--r-md);
+  background: rgba(26, 26, 26, .65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--r-md);
   padding: var(--p-card); margin: 0 var(--sp-16) var(--sp-16);
   display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0;
 }

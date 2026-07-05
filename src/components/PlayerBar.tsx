@@ -1,6 +1,7 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, Music } from 'lucide-react'
 import { useState, useCallback, useEffect } from 'react'
 import type { MusicTrack, ServerStatus } from '../types'
+import { useAlbumColor } from '../hooks/useAlbumColor'
 
 interface Props {
   status: ServerStatus | null
@@ -21,6 +22,8 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
   const [coverError, setCoverError] = useState(false)
   const coverTrackId = sonos?.track.trackId || track?.id
+  const coverImgUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
+  const albumColor = useAlbumColor(coverError ? null : coverImgUrl)
 
   useEffect(() => { setCoverError(false) }, [coverTrackId])
 
@@ -38,14 +41,14 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   }
 
   return (
-    <div className="player-bar" onClick={onClickTrack}>
+    <div className="player-bar" onClick={onClickTrack} style={{ '--cover-rgb': albumColor || '6, 182, 212' } as React.CSSProperties}>
       <div className="player-bar-progress" style={{ width: `${progress}%` }} />
       <div className="player-bar-content">
         <div className="player-bar-track">
           <div className="player-bar-cover">
             {coverTrackId && !coverError ? (
               <img
-                src={`/api/music/cover/${coverTrackId}`}
+                src={coverImgUrl!}
                 alt=""
                 className="player-bar-img"
                 onError={() => setCoverError(true)}
