@@ -81,6 +81,7 @@ function TrackRow({
       className={`track-item${selected ? ' selected' : ''}`}
       style={{ paddingLeft: `${16 + depth * 20}px` }}
       onClick={onPlay}
+      onContextMenu={e => e.preventDefault()}
     >
       <span
         className={`track-check${selected ? ' checked' : ''}`}
@@ -278,7 +279,7 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow }: Props) {
           </button>
         )}
       </div>
-      <div className="track-list">
+      <div className={`track-list${selectMode ? ' select-mode' : ''}`}>
         {filtered.map(root => (
           <DirSection
             key={root.name}
