@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Music, Minus, Plus } from 'lucide-react'
+import { Play, Pause, Loader2, SkipBack, SkipForward, Music, Minus, Plus } from 'lucide-react'
 import { useState, useCallback, useEffect } from 'react'
 import type { MusicTrack, ServerStatus } from '../types'
 
@@ -25,18 +25,19 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
 
   useEffect(() => { setCoverError(false) }, [coverTrackId])
 
-  const handlePlayPause = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (isPlaying) onPause()
-    else onPlay()
-  }, [isPlaying, onPlay, onPause])
-
-  const handleNext = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onNext() }, [onNext])
-  const handlePrevious = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onPrevious() }, [onPrevious])
-
   if (!track) return null
 
   const noDevice = track && !sonos
+
+  const handlePlayPause = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (noDevice) onPause()
+    else if (isPlaying) onPause()
+    else onPlay()
+  }, [isPlaying, onPlay, onPause, noDevice])
+
+  const handleNext = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onNext() }, [onNext])
+  const handlePrevious = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onPrevious() }, [onPrevious])
 
   return (
     <div className="player-bar" onClick={onClickTrack}>
@@ -60,8 +61,8 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
         </div>
         <div className="player-bar-controls" onClick={e => e.stopPropagation()}>
           <button onClick={handlePrevious} aria-label="Previous"><SkipBack size={18} /></button>
-          <button onClick={handlePlayPause} aria-label={isPlaying ? 'Pause' : 'Play'}>
-            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+          <button onClick={handlePlayPause} aria-label={isPlaying ? 'Pause' : noDevice ? 'Cancel' : 'Play'}>
+            {noDevice ? <Loader2 size={20} className="spin" /> : isPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>
           <button onClick={handleNext} aria-label="Next"><SkipForward size={18} /></button>
         </div>

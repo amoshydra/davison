@@ -304,6 +304,8 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.spin { animation: spin 1s linear infinite; }
+
 .np-info { text-align: center; width: 100%; min-width: 0; }
 .np-title { font-size: 1.1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .np-artist { font-size: .85rem; color: var(--text2); margin-top: var(--sp-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
