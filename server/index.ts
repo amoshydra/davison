@@ -6,6 +6,7 @@ import { discoverMusic } from './services/music-discovery.js'
 import { sonosController } from './services/sonos-controller.js'
 import { loadPlaylists } from './services/playlist-store.js'
 import { createApiRouter } from './routes/api.js'
+import { initWebdav } from './services/webdav.js'
 import { startAutoAdvancePolling, stopAutoAdvancePolling } from './services/queue-manager.js'
 
 const program = new Command()
@@ -57,12 +58,13 @@ async function main() {
   app.use(express.json())
 
   app.use('/api', createApiRouter())
+  app.use('/webdav', initWebdav())
 
   if (config.musicPaths.length > 0) {
     config.musicPaths.forEach((musicDir, i) => {
       app.use(`/music-files/${i}`, express.static(musicDir))
     })
-    console.log(`Serving ${config.musicPaths.length} music director${config.musicPaths.length > 1 ? 'ies' : 'y'} at /music-files/*`)
+    console.log(`Serving ${config.musicPaths.length} music director${config.musicPaths.length > 1 ? 'ies' : 'y'} at /music-files/* and /webdav/*`)
   }
 
   server = ViteExpress.listen(app, config.port, () => {
