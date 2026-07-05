@@ -16,7 +16,7 @@ function detectLanIp(): string {
 }
 
 export const config = {
-  port: 3000,
+  port: 4534,
   host: detectLanIp(),
   musicPaths: [] as string[],
   dataDir: path.resolve(import.meta.dirname, '..', 'data'),

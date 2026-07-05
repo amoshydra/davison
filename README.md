@@ -24,7 +24,7 @@ A standalone music server that streams your local music library to Sonos speaker
 npx davison --path /path/to/music
 ```
 
-Open http://localhost:3000 in your browser.
+Open http://localhost:4534 in your browser.
 
 ### Via Docker
 
@@ -59,7 +59,7 @@ services:
 | Option | Description |
 |--------|-------------|
 | `-p, --path <paths...>` | One or more music directories (required) |
-| `--port <number>` | Server port (default: 3000) |
+| `--port <number>` | Server port (default: 4534) |
 | `--host <address>` | LAN address (auto-detected if omitted) |
 
 ### Web UI
@@ -74,11 +74,11 @@ services:
 
 ### WebDAV
 
-The WebDAV server is available at `/webdav` (e.g., `http://192.168.0.x:3000/webdav/`). It mirrors your music folder structure. No authentication required.
+The WebDAV server is available at `/webdav` (e.g., `http://192.168.0.x:4534/webdav/`). It mirrors your music folder structure. No authentication required.
 
 To use with Music Assistant:
 1. Add a **WebDAV** provider
-2. URL: `http://<your-server-ip>:3000/webdav/`
+2. URL: `http://<your-server-ip>:4534/webdav/`
 3. Leave username/password blank
 4. Content type: `music`
 
@@ -104,7 +104,7 @@ The dev server hot-reloads on file changes.
                    │    Web Browser        │
                    │  (React + Vite)       │
                    └──────────┬───────────┘
-                              │ HTTP (port 3000)
+                              │ HTTP (port 4534)
                    ┌──────────▼───────────┐
                    │   Express Server      │
                    │  ┌─────────────────┐  │

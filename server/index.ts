@@ -17,7 +17,7 @@ program
   .name('davison')
   .description('Sonos music player with web UI')
   .option('-p, --path <paths...>', 'Path(s) to music directories')
-  .option('--port <number>', 'Server port', '3000')
+  .option('--port <number>', 'Server port', '4534')
   .option('--host <address>', 'Server LAN address (auto-detected if omitted)')
   .parse(process.argv)
 
