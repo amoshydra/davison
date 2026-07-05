@@ -3,6 +3,7 @@ import { EventEmitter } from 'node:events'
 import dgram from 'node:dgram'
 import os from 'node:os'
 import net from 'node:net'
+import { getMusicLibrary } from './music-discovery.js'
 
 export interface SonosDevice {
   id: string
@@ -15,6 +16,7 @@ export interface SonosDevice {
 export interface SonosStatus {
   state: 'PLAYING' | 'PAUSED_PLAYBACK' | 'STOPPED'
   track: {
+    trackId?: string
     title: string
     artist: string
     album: string
@@ -263,11 +265,19 @@ class SonosController extends EventEmitter {
         device.getMuted(),
       ])
 
+      const sonosTitle = trackInfo?.title || ''
+      const sonosArtist = trackInfo?.artist || ''
+      const library = getMusicLibrary()
+      const matched = library.find(t =>
+        t.title === sonosTitle && t.artist === sonosArtist,
+      )
+
       return {
         state: normalizeSonosState(transportInfo),
         track: {
-          title: trackInfo?.title || 'Unknown',
-          artist: trackInfo?.artist || 'Unknown',
+          trackId: matched?.id,
+          title: sonosTitle || 'Unknown',
+          artist: sonosArtist || 'Unknown',
           album: trackInfo?.album || 'Unknown',
           albumArt: trackInfo?.albumArtURI || '',
           duration: trackInfo?.duration || 0,

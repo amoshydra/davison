@@ -20,8 +20,9 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   const isPlaying = sonos?.state === 'PLAYING'
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
   const [coverError, setCoverError] = useState(false)
+  const coverTrackId = sonos?.track.trackId || track?.id
 
-  useEffect(() => { setCoverError(false) }, [track?.id])
+  useEffect(() => { setCoverError(false) }, [coverTrackId])
 
   const handlePlayPause = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -42,9 +43,9 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
       <div className="player-bar-content">
         <div className="player-bar-track">
           <div className="player-bar-cover">
-            {track && !coverError ? (
+            {coverTrackId && !coverError ? (
               <img
-                src={`/api/music/cover/${track.id}`}
+                src={`/api/music/cover/${coverTrackId}`}
                 alt=""
                 className="player-bar-img"
                 onError={() => setCoverError(true)}

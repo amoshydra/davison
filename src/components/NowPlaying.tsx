@@ -30,10 +30,10 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
   const isPlaying = sonos?.state === 'PLAYING'
 
   const progress = (sonos && sonos.track.duration > 0) ? (sonos.track.position / sonos.track.duration) * 100 : 0
-  const coverUrl = currentTrack ? `/api/music/cover/${currentTrack.id}` : null
+  const coverUrl = (sonos?.track.trackId || currentTrack?.id) ? `/api/music/cover/${sonos?.track.trackId || currentTrack?.id}` : null
   const [coverError, setCoverError] = useState(false)
 
-  useEffect(() => { setCoverError(false) }, [currentTrack?.id])
+  useEffect(() => { setCoverError(false) }, [sonos?.track.trackId, currentTrack?.id])
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     // seeking not implemented on server yet

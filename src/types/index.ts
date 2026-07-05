@@ -22,6 +22,7 @@ export interface SonosDevice {
 }
 
 export interface TrackInfo {
+  trackId?: string
   title: string
   artist: string
   album: string
