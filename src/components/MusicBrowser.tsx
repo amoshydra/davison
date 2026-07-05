@@ -18,19 +18,22 @@ function buildDirs(tracks: MusicTrack[]): DirNode[] {
 
   for (const track of tracks) {
     const parts = track.relativePath.split('/')
+    const fileName = parts.pop()!
+
+    // Prepend baseName as the first path component if not empty
+    const path = track.baseName ? [track.baseName, ...parts] : parts
     let level = roots
 
-    for (let i = 0; i < parts.length - 1; i++) {
-      const name = parts[i]
-      let dir = level.find(d => d.name === name)
+    for (const segment of path) {
+      let dir = level.find(d => d.name === segment)
       if (!dir) {
-        dir = { name, tracks: [], dirs: [] }
+        dir = { name: segment, tracks: [], dirs: [] }
         level.push(dir)
       }
       level = dir.dirs
     }
 
-    level.push({ name: track.fileName, tracks: [track], dirs: [] })
+    level.push({ name: fileName, tracks: [track], dirs: [] })
   }
 
   return roots
