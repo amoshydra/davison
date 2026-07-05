@@ -50,9 +50,9 @@ export function useDevices() {
       const stillExists = selectedId && d.some(dev => dev.id === selectedId)
       if (stillExists) {
         cacheSet(CACHE_KEY_SELECTED, selectedId)
-      } else if (d.length === 1) {
+      } else if (d.length > 0) {
         await select(d[0].id)
-      } else if (d.length === 0) {
+      } else {
         setSelectedId(null)
       }
 
