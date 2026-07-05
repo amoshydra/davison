@@ -71,7 +71,7 @@ function getSubnets(): string[] {
 function normalizeSonosState(state: string): SonosStatus['state'] {
   const upper = state.toUpperCase()
   if (upper === 'PLAYING' || upper === 'TRANSITIONING') return 'PLAYING'
-  if (upper === 'PAUSED_PLAYBACK') return 'PAUSED_PLAYBACK'
+  if (upper === 'PAUSED_PLAYBACK' || upper === 'PAUSED') return 'PAUSED_PLAYBACK'
   if (upper === 'STOPPED') return 'STOPPED'
   console.warn('Unknown Sonos state:', state)
   return 'STOPPED'
