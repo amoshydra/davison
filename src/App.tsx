@@ -74,7 +74,7 @@ export function App() {
         ))}
       </nav>
 
-      <div className="app-main">
+      <div className={`app-main${view !== 'now-playing' ? '' : ' no-bar'}`}>
         {/* Mobile tab header */}
         <div className="tab-header">
           {tabs.map(t => (

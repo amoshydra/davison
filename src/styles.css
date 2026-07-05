@@ -80,6 +80,10 @@ body {
   padding-bottom: var(--bar-h); min-width: 0;
 }
 
+.app-main.no-bar {
+  padding-bottom: 0;
+}
+
 /* ─── Sidebar ─── */
 .sidebar {
   display: none;
