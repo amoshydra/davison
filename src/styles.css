@@ -466,6 +466,7 @@ body {
   margin-left: calc(var(--hd-px) + var(--arrow-w) - var(--it-px) - var(--checkbox-w));
 }
 .track-check.checked { opacity: 1 !important; background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.track-check.indeterminate { opacity: 1 !important; background: var(--surface2); border-color: var(--text3); color: var(--text2); }
 .select-mode .track-check { opacity: 1; }
 @media (hover: hover) {
   .track-item:hover .track-check { opacity: 1; }

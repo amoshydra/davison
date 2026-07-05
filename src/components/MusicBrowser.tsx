@@ -131,7 +131,7 @@ function TrackRow({
         className={`track-check${selected ? ' checked' : ''}`}
         onClick={e => { e.stopPropagation(); onToggle() }}
       >
-        {selected && <Check size={14} />}
+        {selected && <Check size={16} />}
       </span>
       <div className="track-info">
         <span className="track-title">{track.title}</span>
@@ -206,10 +206,10 @@ function DirSection({
         onClick={() => setCollapsed(!collapsed)}
       >
         <span
-          className={`track-check${allSelected ? ' checked' : ''}`}
+          className={`track-check${allSelected ? ' checked' : ''}${someSelected && !allSelected ? ' indeterminate' : ''}`}
           onClick={e => { e.stopPropagation(); onToggleMany(allIds) }}
         >
-          {allSelected ? <Check size={14} /> : someSelected ? <Minus size={14} /> : null}
+          {allSelected ? <Check size={16} /> : someSelected ? <Minus size={16} /> : null}
         </span>
         <span className="dir-arrow">
           {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
