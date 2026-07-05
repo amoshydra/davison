@@ -108,7 +108,7 @@ export function App() {
         ))}
       </nav>
 
-      <div className={`app-main${view !== 'now-playing' ? '' : ' no-bar'}`}>
+      <div className="app-main">
         {/* Content panels — all mounted, only active one is visible */}
         <div className="view-panel">
           <div className="view-stack" style={{ display: view === 'library' ? 'flex' : 'none' }}>
@@ -167,7 +167,22 @@ export function App() {
           </div>
         </div>
 
-        {/* Bottom navigation (mobile) */}
+        {/* Bottom player bar — in-flow, above bottom-nav, hidden when now-playing */}
+        {view !== 'now-playing' && (
+          <PlayerBar
+            status={status.status}
+            volume={vol}
+            deviceName={devices.selectedDevice?.name}
+            onPlay={playback.play}
+            onPause={playback.pause}
+            onNext={playback.next}
+            onPrevious={playback.previous}
+            onSetVolume={playback.setVolume}
+            onClickTrack={() => setView('now-playing')}
+          />
+        )}
+
+        {/* Bottom navigation (mobile) — always at the very bottom */}
         <nav className="bottom-nav">
           {tabs.map(t => (
             <button
@@ -181,21 +196,6 @@ export function App() {
           ))}
         </nav>
       </div>
-
-      {/* Bottom player bar — hidden when now-playing is active (duplicate controls) */}
-      {view !== 'now-playing' && (
-        <PlayerBar
-          status={status.status}
-          volume={vol}
-          deviceName={devices.selectedDevice?.name}
-          onPlay={playback.play}
-          onPause={playback.pause}
-          onNext={playback.next}
-          onPrevious={playback.previous}
-          onSetVolume={playback.setVolume}
-          onClickTrack={() => setView('now-playing')}
-        />
-      )}
     </div>
   )
 }
