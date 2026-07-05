@@ -226,6 +226,9 @@ export function MusicBrowser({ tracks, onAddToQueue, onPlayNow, onPlayNext }: Pr
     if (next.has(id)) next.delete(id)
     else next.add(id)
     setSelected(next)
+    if (next.size === 0 && selectMode) {
+      setSelectMode(false)
+    }
   }
 
   function handlePlay(id: string) {
