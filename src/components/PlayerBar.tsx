@@ -1,7 +1,6 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, Music } from 'lucide-react'
 import { useState, useCallback, useEffect } from 'react'
 import type { MusicTrack, ServerStatus } from '../types'
-import { useAlbumColor } from '../hooks/useAlbumColor'
 
 interface Props {
   status: ServerStatus | null
@@ -23,8 +22,8 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   const [coverError, setCoverError] = useState(false)
   const coverTrackId = sonos?.track.trackId || track?.id
   const coverImgUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
-  const fallbackKey = sonos ? `${sonos.track.title}|${sonos.track.artist}|${sonos.track.album}` : track ? `${track.title}|${track.artist}` : undefined
-  const albumColor = useAlbumColor(coverError ? null : coverImgUrl, fallbackKey)
+
+  useEffect(() => { setCoverError(false) }, [coverTrackId])
 
   useEffect(() => { setCoverError(false) }, [coverTrackId])
 
@@ -42,7 +41,7 @@ export function PlayerBar({ status, volume, deviceName, onPlay, onPause, onNext,
   }
 
   return (
-    <div className="player-bar" onClick={onClickTrack} style={{ '--cover-rgb': albumColor } as React.CSSProperties}>
+    <div className="player-bar" onClick={onClickTrack}>
       <div className="player-bar-progress" style={{ width: `${progress}%` }} />
       <div className="player-bar-content">
         <div className="player-bar-track">

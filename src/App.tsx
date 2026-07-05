@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Music, ListMusic, Disc3, ListOrdered, Settings } from 'lucide-react'
 import { useDevices, useMusic, useStatus, usePlayback, usePlaylists } from './hooks/useSonosApi'
-import { useAlbumColor } from './hooks/useAlbumColor'
 import { DeviceSelector } from './components/DeviceSelector'
 import { MusicBrowser } from './components/MusicBrowser'
 import { NowPlayingView } from './components/NowPlaying'
@@ -53,12 +52,9 @@ export function App() {
   const vol = status.status?.sonos?.volume ?? 50
   const coverTrackId = status.status?.sonos?.track.trackId || status.status?.queue.currentTrack?.id || null
   const coverUrl = coverTrackId ? `/api/music/cover/${coverTrackId}` : null
-  const sonos = status.status?.sonos
-  const fallbackKey = sonos ? `${sonos.track.title}|${sonos.track.artist}|${sonos.track.album}` : undefined
-  const albumColor = useAlbumColor(coverUrl, fallbackKey)
 
   return (
-    <div className="app" style={{ '--cover-rgb': albumColor } as React.CSSProperties}>
+    <div className="app" style={{ '--cover-bg': coverUrl ? `url(${coverUrl})` : 'none' } as React.CSSProperties}>
       {/* Desktop sidebar */}
       <nav className="sidebar">
         <div className="sidebar-logo">S</div>

@@ -18,10 +18,8 @@
   --it-px: 6px;   /* track-item padding-left at depth 0 */
   --indent: 20px; /* nesting indent per depth level */
 
-  /* dynamic album-art color (set inline, falls back to accent) */
-  --cover-rgb: 6, 182, 212;
-  --cover-dim: rgba(var(--cover-rgb), .08);
-  --cover-glow: rgba(var(--cover-rgb), .25);
+  /* dynamic album-art background (set inline, blurred behind content) */
+  --cover-bg: none;
 
   /* spacing scale */
   --sp-2: 2px;  --sp-4: 4px;  --sp-6: 6px;
@@ -65,7 +63,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
-  background: radial-gradient(ellipse at 50% 0%, var(--cover-dim) 0%, var(--bg) 70%) fixed var(--bg);
+  background: var(--bg);
   color: var(--text);
   overflow-wrap: break-word;
   word-break: break-word;
@@ -73,7 +71,21 @@ body {
 }
 
 /* ─── App shell ─── */
-.app { display: flex; height: 100dvh; min-width: 0; }
+.app { display: flex; height: 100dvh; min-width: 0; position: relative; }
+
+.app::before {
+  content: '';
+  position: fixed;
+  inset: -40px;
+  background-image: var(--cover-bg);
+  background-size: cover;
+  background-position: center;
+  filter: blur(60px);
+  opacity: .12;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity .6s;
+}
 
 .app-main {
   flex: 1; display: flex; flex-direction: column;
@@ -250,18 +262,17 @@ body {
 .vinyl-disc {
   width: 100%; height: 100%; border-radius: 50%;
   background:
-    conic-gradient(from 0deg, #222, #333, #2a2a2a, #444, #222),
-    radial-gradient(circle, rgba(var(--cover-rgb), .12) 0%, transparent 70%);
+    conic-gradient(from 0deg, #222, #333, #2a2a2a, #444, #222);
   background-blend-mode: overlay;
   animation: spin 4s linear infinite;
   animation-play-state: paused; position: relative;
-  box-shadow: 0 8px 40px rgba(0,0,0,.4), 0 0 60px rgba(var(--cover-rgb), .1);
+  box-shadow: 0 8px 40px rgba(0,0,0,.4);
 }
 
 .now-playing-cover {
   width: 100%; height: 100%;
   object-fit: cover;
-  box-shadow: 0 8px 60px var(--cover-glow), 0 8px 40px rgba(0,0,0,.4);
+  box-shadow: 0 8px 40px rgba(0,0,0,.4);
 }
 .vinyl-disc.playing { animation-play-state: running; }
 
