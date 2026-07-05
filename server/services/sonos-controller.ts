@@ -70,7 +70,7 @@ function getSubnets(): string[] {
 
 function normalizeSonosState(state: string): SonosStatus['state'] {
   const upper = state.toUpperCase()
-  if (upper === 'PLAYING') return 'PLAYING'
+  if (upper === 'PLAYING' || upper === 'TRANSITIONING') return 'PLAYING'
   if (upper === 'PAUSED_PLAYBACK') return 'PAUSED_PLAYBACK'
   if (upper === 'STOPPED') return 'STOPPED'
   console.warn('Unknown Sonos state:', state)
@@ -85,7 +85,7 @@ class SonosController extends EventEmitter {
 
   async discoverDevices(timeout = SSDP_TIMEOUT): Promise<SonosDevice[]> {
     if (this.discovering) {
-      console.warn('Discovery already in progress')
+      console.debug('Discovery already in progress')
       return this.getDevices()
     }
     this.discovering = true
