@@ -61,59 +61,58 @@ export function NowPlayingView({ status, volume, loopMode, deviceName, onPlay, o
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Top section */}
-      <div className="np-top">
-        {/* Hero */}
-        <div className="np-hero">
-          {coverUrl && !coverError ? (
-            <img
-              src={coverUrl}
-              alt=""
-              className="np-cover"
-              onError={() => setCoverError(true)}
-            />
-          ) : (
-            <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
-          )}
-        </div>
-
-        {/* Track info */}
-        <div className="np-info">
-          {sonos ? (
-            <>
-              <h2 className="np-title">{sonos.track.title}</h2>
-              <p className="np-artist">{sonos.track.artist}</p>
-              {deviceName && <span className="np-device">{deviceName}</span>}
-            </>
-          ) : (
-            <>
-              <h2 className="np-title">No track playing</h2>
-              <p className="np-artist">Select music to play</p>
-            </>
-          )}
-        </div>
-
-        {/* Up next (collapsible) */}
-        {nextTracks.length > 0 && showUpNext && (
-          <div className="np-upnext">
-            <h4>Up next</h4>
-            {nextTracks.map((t, i) => (
-              <div key={`${t.id}-${i}`} className="np-upnext-item">
-                <span className="np-upnext-num">{currentIndex + 2 + i}</span>
-                <div className="np-upnext-info">
-                  <span>{t.title}</span>
-                  <span>{t.artist}</span>
-                </div>
-              </div>
-            ))}
+      {/* Scrollable top content */}
+      <div className="np-scroll">
+        <div className="np-top">
+          {/* Hero */}
+          <div className="np-hero">
+            {coverUrl && !coverError ? (
+              <img
+                src={coverUrl}
+                alt=""
+                className="np-cover"
+                onError={() => setCoverError(true)}
+              />
+            ) : (
+              <div className={`vinyl-disc${isPlaying ? ' playing' : ''}`} />
+            )}
           </div>
-        )}
+
+          {/* Track info */}
+          <div className="np-info">
+            {sonos ? (
+              <>
+                <h2 className="np-title">{sonos.track.title}</h2>
+                <p className="np-artist">{sonos.track.artist}</p>
+                {deviceName && <span className="np-device">{deviceName}</span>}
+              </>
+            ) : (
+              <>
+                <h2 className="np-title">No track playing</h2>
+                <p className="np-artist">Select music to play</p>
+              </>
+            )}
+          </div>
+
+          {/* Up next (collapsible) */}
+          {nextTracks.length > 0 && showUpNext && (
+            <div className="np-upnext">
+              <h4>Up next</h4>
+              {nextTracks.map((t, i) => (
+                <div key={`${t.id}-${i}`} className="np-upnext-item">
+                  <span className="np-upnext-num">{currentIndex + 2 + i}</span>
+                  <div className="np-upnext-info">
+                    <span>{t.title}</span>
+                    <span>{t.artist}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Spacer — pushes bottom section down */}
-      <div className="np-spacer" />
-
-      {/* Bottom section — always at the bottom */}
+      {/* Bottom section — always visible */}
       <div className="np-bottom">
         {/* Volume (subtle) */}
         <div className="np-volume">

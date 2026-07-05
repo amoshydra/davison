@@ -247,18 +247,20 @@ body {
   flex: 1; min-width: 0;
   padding: var(--sp-16);
   touch-action: pan-y;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-/* Top section — hero + info, grows to fill */
+/* Scrollable top section — hero + info */
+.np-scroll {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .np-top {
   display: flex; flex-direction: column; align-items: center;
   gap: var(--sp-8);
-}
-
-/* Spacer pushes bottom section down */
-.np-spacer {
-  flex: 1; min-height: var(--sp-8);
+  padding-bottom: var(--sp-12);
 }
 
 /* Bottom section — always at the bottom */
