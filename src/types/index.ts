@@ -3,6 +3,7 @@ export interface MusicTrack {
   filePath: string
   fileName: string
   relativePath: string
+  baseIdx: number
   title: string
   artist: string
   album: string

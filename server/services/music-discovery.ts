@@ -8,6 +8,7 @@ export interface MusicTrack {
   filePath: string
   fileName: string
   relativePath: string
+  baseIdx: number
   title: string
   artist: string
   album: string
@@ -23,14 +24,14 @@ const supportedExtensions = new Set([
 
 let musicLibrary: MusicTrack[] = []
 
-async function walkDir(dirPath: string, basePath: string): Promise<MusicTrack[]> {
+async function walkDir(dirPath: string, basePath: string, baseIdx: number): Promise<MusicTrack[]> {
   const results: MusicTrack[] = []
   const entries = await readdir(dirPath, { withFileTypes: true })
 
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name)
     if (entry.isDirectory()) {
-      results.push(...await walkDir(fullPath, basePath))
+      results.push(...await walkDir(fullPath, basePath, baseIdx))
     } else if (entry.isFile()) {
       const ext = path.extname(entry.name).toLowerCase()
       if (!supportedExtensions.has(ext)) continue
@@ -47,6 +48,7 @@ async function walkDir(dirPath: string, basePath: string): Promise<MusicTrack[]>
         filePath: fullPath,
         fileName: entry.name,
         relativePath: path.relative(basePath, fullPath),
+        baseIdx,
         title: metadata.common.title || path.parse(entry.name).name,
         artist: metadata.common.artist || 'Unknown Artist',
         album: metadata.common.album || 'Unknown Album',
@@ -61,12 +63,12 @@ async function walkDir(dirPath: string, basePath: string): Promise<MusicTrack[]>
 
 export async function discoverMusic(paths: string[]): Promise<MusicTrack[]> {
   const all: MusicTrack[] = []
-  for (const p of paths) {
-    const resolved = path.resolve(p)
+  for (let i = 0; i < paths.length; i++) {
+    const resolved = path.resolve(paths[i])
     try {
       const stats = await stat(resolved)
       if (stats.isDirectory()) {
-        all.push(...await walkDir(resolved, resolved))
+        all.push(...await walkDir(resolved, resolved, i))
       }
     } catch {
       console.warn(`Music path not accessible: ${resolved}`)

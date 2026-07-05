@@ -77,7 +77,7 @@ class QueueManager extends EventEmitter {
 
     try {
       const encodedPath = track.relativePath.split('/').map(s => encodeURIComponent(s)).join('/')
-      const streamUrl = `http://${config.host}:${config.port}/music-files/${encodedPath}`
+      const streamUrl = `http://${config.host}:${config.port}/music-files/${track.baseIdx}/${encodedPath}`
       await sonosController.playUri(streamUrl, track.title)
     } catch (err) {
       console.error('Failed to play track:', err)

@@ -20,8 +20,14 @@ program
 const options = program.opts()
 
 config.port = parseInt(options.port, 10) || 3000
-if (options.host) config.host = options.host
-config.musicPaths = options.path || []
+  if (options.host) config.host = options.host
+  config.musicPaths = options.path || []
+
+  config.musicPaths.forEach(p => {
+    if (p.includes(' ')) {
+      console.warn(`Warning: path "${p}" contains spaces — make sure it was quoted in the shell`)
+    }
+  })
 
 async function main() {
   console.log('Starting sonos-node...')
@@ -42,9 +48,10 @@ async function main() {
   app.use('/api', createApiRouter())
 
   if (config.musicPaths.length > 0) {
-    const musicDir = config.musicPaths[0]
-    app.use('/music-files', express.static(musicDir))
-    console.log(`Serving static files from ${musicDir} at /music-files`)
+    config.musicPaths.forEach((musicDir, i) => {
+      app.use(`/music-files/${i}`, express.static(musicDir))
+    })
+    console.log(`Serving ${config.musicPaths.length} music director${config.musicPaths.length > 1 ? 'ies' : 'y'} at /music-files/*`)
   }
 
   sonosController.discoverDevices().then(devices => {
