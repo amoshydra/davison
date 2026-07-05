@@ -235,15 +235,16 @@ main {
 
 .track-title {
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .track-artist,
 .track-album {
   font-size: 0.8rem;
   color: #888;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .track-duration {
