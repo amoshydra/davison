@@ -221,11 +221,11 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
           case 'getetag':
             return nodePath.replace(/\//g, '_')
           case 'resourcetype':
-            return isCollection ? { collection: {} } : {}
+            return isCollection ? { collection: {} } : undefined
           case 'displayname':
             return nodePath.split('/').filter(Boolean).pop() || '/'
           case 'supportedlock':
-            return { lockentry: [] }
+            return undefined
           default:
             return undefined
         }
