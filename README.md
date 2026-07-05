@@ -61,6 +61,7 @@ services:
 | `-p, --path <paths...>` | One or more music directories (required) |
 | `--port <number>` | Server port (default: 4534) |
 | `--host <address>` | LAN address (auto-detected if omitted) |
+| `--webdav <bool>` | Enable/disable WebDAV (default: true, accepts true/false/1/0) |
 
 ### Web UI
 

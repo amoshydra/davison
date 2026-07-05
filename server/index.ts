@@ -19,6 +19,7 @@ program
   .option('-p, --path <paths...>', 'Path(s) to music directories')
   .option('--port <number>', 'Server port', '4534')
   .option('--host <address>', 'Server LAN address (auto-detected if omitted)')
+  .option('--webdav <enable>', 'Enable/disable WebDAV server (true/false/1/0)', 'true')
   .parse(process.argv)
 
 const options = program.opts()
@@ -27,7 +28,9 @@ config.port = parseInt(options.port, 10) || 4534
 if (options.host) config.host = options.host
 config.musicPaths = options.path || []
 
-// WebDAV credentials from environment (not CLI — avoids ps leak)
+// Parse --webdav (accepts true/false/1/0/TRUE/FALSE)
+const falsy = new Set(['false', '0', 'no', 'off', 'disable'])
+config.webdavEnabled = !falsy.has(String(options.webdav).toLowerCase())
 config.webdavUser = process.env.DAVISON_WEBDAV_USER || ''
 config.webdavPass = process.env.DAVISON_WEBDAV_PASS || ''
 
@@ -73,7 +76,10 @@ async function main() {
   app.use(express.json())
 
   app.use('/api', createApiRouter())
-  app.use('/webdav', initWebdav())
+  if (config.webdavEnabled) {
+    app.use('/webdav', initWebdav())
+    console.log('WebDAV enabled at /webdav')
+  }
 
   if (config.musicPaths.length > 0) {
     config.musicPaths.forEach((musicDir, i) => {

@@ -19,6 +19,7 @@ export const config = {
   port: 4534,
   host: detectLanIp(),
   musicPaths: [] as string[],
+  webdavEnabled: true,
   webdavUser: '' as string,
   webdavPass: '' as string,
   dataDir: path.resolve(import.meta.dirname, '..', 'data'),
