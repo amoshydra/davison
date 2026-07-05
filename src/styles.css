@@ -467,7 +467,10 @@ body {
 }
 .track-check.checked { opacity: 1 !important; background: var(--accent); border-color: var(--accent); color: var(--bg); }
 .select-mode .track-check { opacity: 1; }
-@media (hover: hover) { .track-item:hover .track-check { opacity: 1; } }
+@media (hover: hover) {
+  .track-item:hover .track-check { opacity: 1; }
+  .dir-header:hover .track-check { opacity: 1; }
+}
 
 .track-item {
   display: flex; align-items: center; gap: var(--sp-6);
