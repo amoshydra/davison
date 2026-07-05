@@ -27,7 +27,6 @@ class ComfyUIGenerator extends EventEmitter implements AudioGenerator {
 
   async generate(request: AudioGenerationRequest): Promise<AudioGenerationResult> {
     this.emit('generation-start', request)
-    const { default: fetch } = await import('node-fetch')
 
     const workflow = {
       ...this.workflowTemplate,
@@ -46,7 +45,7 @@ class ComfyUIGenerator extends EventEmitter implements AudioGenerator {
       throw new Error(`ComfyUI API error: ${response.statusText}`)
     }
 
-    const result = await response.json()
+    const result = await response.json() as Record<string, any>
     this.emit('generation-complete', result)
 
     return {
