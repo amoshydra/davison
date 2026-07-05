@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  sonos-node:
+    build: .
+    network_mode: host
+    volumes:
+      # Mount your music directories here (read-only is safe)
+      - /path/to/your/music:/music:ro
+    environment:
+      - NODE_ENV=production
+    command: ["--path", "/music"]

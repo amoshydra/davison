@@ -1,13 +1,18 @@
 {
   "name": "sonos-node",
-  "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Standalone music server for Sonos speakers with WebDAV support",
   "type": "module",
+  "bin": {
+    "sonos-node": "./bin/sonos-node.js"
+  },
   "scripts": {
     "dev": "tsx watch --ignore './vite.config.ts.timestamp-*' --ignore ./src --ignore ./node_modules server/index.ts",
     "build": "vite build",
     "serve": "NODE_ENV=production tsx server/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docker:build": "docker build -t sonos-node .",
+    "docker:run": "docker run --network host -v $(pwd)/music:/music:ro sonos-node --path /music"
   },
   "dependencies": {
     "@nephele/adapter-file-system": "1.0.0-alpha.67",
@@ -31,10 +36,8 @@
     "@types/react-dom": "^18.3.0",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "patch-package": "^8.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "ts-node": "^10.9.2",
     "tsx": "^4.23.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.3"
