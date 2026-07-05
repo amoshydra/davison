@@ -1,39 +1,50 @@
 import createServer from 'nephele'
 import Adapter from '@nephele/adapter-file-system'
 import Authenticator from '@nephele/authenticator-none'
-import { mkdirSync, existsSync, symlinkSync, unlinkSync, readdirSync } from 'node:fs'
 import path from 'node:path'
+import { mkdirSync, existsSync, readdirSync, rmSync } from 'node:fs'
 import { config } from '../config.js'
-
-const mergedDir = path.resolve(config.dataDir, 'webdav-music')
 
 let _webdavApp: ReturnType<typeof createServer> | null = null
 
 export function initWebdav(): ReturnType<typeof createServer> {
   if (_webdavApp) return _webdavApp
 
-  if (!existsSync(mergedDir)) {
-    mkdirSync(mergedDir, { recursive: true })
+  // Build a root directory that lists available music paths as subdirectories
+  const rootDir = path.resolve(config.dataDir, 'webdav-root')
+  if (!existsSync(rootDir)) {
+    mkdirSync(rootDir, { recursive: true })
   }
 
-  // Refresh symlinks
-  try {
-    for (const entry of readdirSync(mergedDir)) {
-      try { unlinkSync(path.join(mergedDir, entry)) } catch { /* ignore */ }
-    }
-  } catch { /* dir may not exist yet */ }
+  // Clean and rebuild the root directory contents
+  for (const entry of readdirSync(rootDir)) {
+    rmSync(path.join(rootDir, entry), { recursive: true, force: true })
+  }
 
   for (const musicPath of config.musicPaths) {
     const resolved = path.resolve(musicPath)
-    const parentDir = path.basename(path.dirname(resolved))
-    const name = parentDir && parentDir !== path.sep
-      ? `${parentDir}_${path.basename(resolved)}`
+    const parent = path.basename(path.dirname(resolved))
+    const name = parent && parent !== path.sep
+      ? `${parent}_${path.basename(resolved)}`
       : path.basename(resolved)
-    try { symlinkSync(resolved, path.join(mergedDir, name)) } catch { /* ignore */ }
+    mkdirSync(path.join(rootDir, name), { recursive: true })
+  }
+
+  const adapters: Record<string, InstanceType<typeof Adapter>> = {
+    '/': new Adapter({ root: rootDir }),
+  }
+
+  for (const musicPath of config.musicPaths) {
+    const resolved = path.resolve(musicPath)
+    const parent = path.basename(path.dirname(resolved))
+    const name = parent && parent !== path.sep
+      ? `${parent}_${path.basename(resolved)}`
+      : path.basename(resolved)
+    adapters[`/${name}`] = new Adapter({ root: resolved })
   }
 
   _webdavApp = createServer({
-    adapter: new Adapter({ root: mergedDir, followLinks: true }),
+    adapter: adapters,
     authenticator: new Authenticator(),
   })
 
