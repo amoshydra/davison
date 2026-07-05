@@ -1,5 +1,4 @@
 import createServer from 'nephele'
-import Authenticator from '@nephele/authenticator-custom'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
@@ -177,9 +176,16 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
       if (!isCollection || !node) return []
       const members: any[] = []
 
-      // Subdirectories (sorted by buildDirs)
+      // Subdirectories and track leaf nodes (sorted by buildDirs)
       for (const dir of node.dirs) {
-        members.push(createVirtualResource(adapter, baseUrl, `${nodePath}/${dir.name}/`, dir, null, true))
+        // Leaf track nodes (in dirs array from buildDirs) are files, not directories
+        if (dir.tracks.length === 1 && dir.dirs.length === 0) {
+          const filePath = dir.tracks[0].filePath
+          const fileName = path.basename(filePath)
+          members.push(createVirtualResource(adapter, baseUrl, `${nodePath}/${fileName}`, null, filePath, false))
+        } else {
+          members.push(createVirtualResource(adapter, baseUrl, `${nodePath}/${dir.name}/`, dir, null, true))
+        }
       }
 
       // Tracks at this level
@@ -197,21 +203,72 @@ function createVirtualResource(adapter: any, baseUrl: URL, nodePath: string, nod
     async setProperty() {},
     async removeProperty() {},
     getProperties() {
+      const resolve = async (name: string) => {
+        switch (name) {
+          case 'getcontentlength':
+            return String(isCollection ? 0 : (realPath ? await getRealSize(realPath) : 0))
+          case 'getlastmodified': {
+            const d = await getRealMtime(realPath || '')
+            return d.toUTCString()
+          }
+          case 'creationdate': {
+            const d = await getRealMtime(realPath || '')
+            return d.toISOString()
+          }
+          case 'getcontenttype':
+            if (realPath) return mime.getType(realPath) || 'application/octet-stream'
+            return 'httpd/unix-directory'
+          case 'getetag':
+            return nodePath.replace(/\//g, '_')
+          case 'resourcetype':
+            return isCollection ? { collection: {} } : {}
+          case 'displayname':
+            return nodePath.split('/').filter(Boolean).pop() || '/'
+          case 'supportedlock':
+            return { lockentry: [] }
+          default:
+            return undefined
+        }
+      }
+
+      // Standard live property names
+      const liveNames = [
+        'creationdate', 'getcontentlength', 'getcontenttype',
+        'getetag', 'getlastmodified', 'resourcetype', 'supportedlock',
+        'displayname',
+      ]
+
       return {
-        get: async (name: string) => {
-          if (name === 'getcontentlength') return String(isCollection ? 0 : (realPath ? (await stat(realPath)).size : 0))
-          if (name === 'getlastmodified') { const d = await getRealMtime(realPath || ''); return d.toUTCString() }
-          if (name === 'creationdate') { const d = await getRealMtime(realPath || ''); return d.toISOString() }
-          if (name === 'getcontenttype') { if (realPath) return mime.getType(realPath) || 'application/octet-stream'; return 'httpd/unix-directory' }
-          if (name === 'getetag') { return nodePath.replace(/\//g, '_') }
-          if (name === 'resourcetype') { return isCollection ? '<collection/>' : '' }
-          if (name === 'displayname') { return nodePath.split('/').filter(Boolean).pop() || '/' }
-          // Unknown property: return undefined (Nephele handles PropertyNotFoundError)
-          return undefined
+        get: resolve,
+        getByUser: async (name: string) => resolve(name),
+        getAllByUser: async () => {
+          const out: Record<string, any> = {}
+          for (const name of liveNames) {
+            const v = await resolve(name)
+            if (v !== undefined) out[name] = v
+          }
+          return out
         },
-        listByUser: async () => [],
-        getAllByUser: async () => ({}),
-        getByUser: async () => undefined,
+        listByUser: async () => liveNames,
+        listLiveByUser: async () => liveNames,
+        listDeadByUser: async () => [],
+        getAll: async () => {
+          const out: Record<string, any> = {}
+          for (const name of liveNames) {
+            const v = await resolve(name)
+            if (v !== undefined) out[name] = v
+          }
+          return out
+        },
+        list: async () => liveNames,
+        listLive: async () => liveNames,
+        listDead: async () => [],
+        set: async () => {},
+        setByUser: async () => {},
+        remove: async () => {},
+        removeByUser: async () => {},
+        runInstructions: async () => undefined,
+        runInstructionsByUser: async () => undefined,
       }
     },
     getLocks() { return [] },
@@ -317,13 +374,14 @@ export function initWebdav(): ReturnType<typeof createServer> {
   const tree = buildDirs(tracks)
   const adapter = new VirtualAdapter(tree)
 
+  class NoAuth {
+    async authenticate() { return { username: 'sonos' } }
+    async cleanAuthentication() {}
+  }
+
   _webdavApp = createServer({
     adapter: adapter as any,
-    authenticator: new Authenticator({
-      unauthorizedAccess: true,
-      getUser: async () => ({ username: 'sonos' }),
-      authBasic: async () => false,
-    }),
+    authenticator: new NoAuth(),
   })
 
   return _webdavApp
