@@ -1,5 +1,9 @@
 # davison
 
+[![npm](https://img.shields.io/npm/v/@amoshydra/davison.svg)](https://www.npmjs.com/package/@amoshydra/davison)
+[![License](https://img.shields.io/github/license/amoshydra/davison.svg)](LICENSE)
+[![Node.js](https://img.shields.io/node/v/@amoshydra/davison.svg)](https://nodejs.org/)
+
 A standalone music server that streams your local music library to Sonos speakers and serves it via WebDAV for tools like Music Assistant.
 
 ## Features
@@ -21,7 +25,7 @@ A standalone music server that streams your local music library to Sonos speaker
 ### Via npx
 
 ```bash
-npx davison --path /path/to/music
+npx @amoshydra/davison --path /path/to/music
 ```
 
 Open http://localhost:4534 in your browser.
@@ -29,11 +33,12 @@ Open http://localhost:4534 in your browser.
 ### Via Docker
 
 ```bash
+docker build -t davison .
 docker run -d \
   --name davison \
   --network host \
   -v /path/to/music:/music:ro \
-  ghcr.io/your-username/davison \
+  davison \
   --path /music
 ```
 
@@ -45,7 +50,8 @@ docker run -d \
 version: "3.8"
 services:
   davison:
-    image: ghcr.io/your-username/davison
+    build: .
+    image: davison
     network_mode: host
     volumes:
       - /path/to/music:/music:ro
@@ -82,7 +88,7 @@ The WebDAV server is available at `/webdav` (e.g., `http://<your-server-ip>:4534
 Disabled by default. To require Basic authentication, set the `DAVISON_WEBDAV_USER` and `DAVISON_WEBDAV_PASS` environment variables:
 
 ```bash
-DAVISON_WEBDAV_USER=davison DAVISON_WEBDAV_PASS="your-password" npx davison --path /music
+DAVISON_WEBDAV_USER=davison DAVISON_WEBDAV_PASS="your-password" npx @amoshydra/davison --path /music
 ```
 
 Environment variables are recommended over CLI flags because they do not appear in process listings (`ps aux`) or shell history. When authentication is enabled, the server logs `WebDAV auth enabled for user "<username>"` on startup.
@@ -99,7 +105,7 @@ davison discovers Sonos speakers on your LAN automatically via SSDP multicast. S
 ## Development
 
 ```bash
-git clone https://github.com/your-username/davison.git
+git clone https://github.com/amoshydra/davison.git
 cd davison
 pnpm install
 pnpm run dev -- --path /path/to/music
@@ -139,4 +145,4 @@ The dev server hot-reloads on file changes.
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).

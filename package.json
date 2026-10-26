@@ -14,13 +14,18 @@
     "serve": "NODE_ENV=production node dist-server/index.js",
     "typecheck": "tsc --noEmit",
     "docker:build": "docker build -t davison .",
-    "docker:run": "docker run --network host -v $(pwd)/music:/music:ro davison --path /music"
+    "docker:run": "docker run --network host -v $(pwd)/music:/music:ro davison --path /music",
+    "postinstall": "node scripts/patch-nephele.mjs",
+    "predev": "node scripts/patch-nephele.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "lint:package": "publint",
+    "prepack": "pnpm run build"
   },
   "files": [
     "dist/",
     "dist-server/",
     "bin/",
-    "patches/",
+    "scripts/patch-nephele.mjs",
     "package.json",
     "README.md",
     "LICENSE",
@@ -28,10 +33,10 @@
   ],
   "dependencies": {
     "commander": "^12.1.0",
-    "express": "^4.21.0",
+    "express": "^4.22.3",
     "mime": "^4.1.0",
-    "music-metadata": "^10.6.0",
-    "nephele": "1.0.0-alpha.67",
+    "music-metadata": "^12.3.2",
+    "nephele": "1.0.0-alpha.68",
     "sonos": "^1.14.3",
     "vite-express": "^0.22.1"
   },
@@ -41,9 +46,9 @@
     "@types/node": "^22.5.0",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.1",
     "lucide-react": "^1.23.0",
+    "publint": "^0.3.25",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tsx": "^4.23.0",
@@ -52,10 +57,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/amoshydra/davison.git"
+    "url": "git+https://github.com/amoshydra/davison.git"
   },
   "bugs": {
     "url": "https://github.com/amoshydra/davison/issues"
   },
-  "homepage": "https://github.com/amoshydra/davison#readme"
+  "homepage": "https://github.com/amoshydra/davison#readme",
+  "license": "MIT",
+  "author": "amoshydra",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.10.0",
+  "keywords": [
+    "sonos",
+    "webdav",
+    "music",
+    "music-server",
+    "local-network",
+    "streaming",
+    "npx"
+  ]
 }

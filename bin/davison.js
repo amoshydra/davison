@@ -4,26 +4,14 @@
 import { spawn, execSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync } from 'node:fs'
+import { patchNephele } from '../scripts/patch-nephele.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '..')
 
-// Apply the Nephele HEAD Content-Length patch if not already applied
-const getHeadPath = resolve(root, 'node_modules', 'nephele', 'dist', 'Methods', 'GET_HEAD.js')
-if (existsSync(getHeadPath)) {
-  const content = readFileSync(getHeadPath, 'utf8')
-  if (!content.includes("'Content-Length':")) {
-    const patchPath = resolve(root, 'patches', 'nephele.patch')
-    if (existsSync(patchPath)) {
-      try {
-        execSync(`patch -p0 < "${patchPath}"`, { cwd: resolve(root, 'node_modules', 'nephele'), stdio: 'pipe' })
-      } catch {
-        // patch wasn't applied, server still works
-      }
-    }
-  }
-}
+// Apply the Nephele HEAD Content-Length patch when install scripts were skipped.
+patchNephele(root)
 
 // Auto-build if needed (first run from git clone)
 if (!existsSync(resolve(root, 'dist-server', 'index.js'))) {
